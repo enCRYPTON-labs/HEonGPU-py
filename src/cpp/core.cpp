@@ -47,14 +47,22 @@ namespace heongpu_py
             explicit Stream(bool non_blocking)
             {
                 HEONGPU_PY_CUDA_CHECK(cudaStreamCreateWithFlags(
-                    &stream_, non_blocking ? cudaStreamNonBlocking
-                                           : cudaStreamDefault));
+                    &stream_,
+                    non_blocking ? cudaStreamNonBlocking : cudaStreamDefault));
             }
 
             Stream(const Stream&) = delete;
             Stream& operator=(const Stream&) = delete;
 
-            ~Stream() { close(); }
+            // Runs with the GIL held; no wait is needed, since shutdown()
+            // destroys the retired streams only when no work is left.
+            ~Stream()
+            {
+                if (stream_ != nullptr)
+                {
+                    retire_stream(stream_);
+                }
+            }
 
             void close() noexcept
             {
@@ -115,7 +123,8 @@ namespace heongpu_py
             return config;
         }
 
-        template <typename T> std::string optional_repr(const std::optional<T>& v)
+        template <typename T>
+        std::string optional_repr(const std::optional<T>& v)
         {
             if (!v)
             {
@@ -235,12 +244,13 @@ namespace heongpu_py
                  [](const heongpu::ExecutionOptions& self)
                  {
                      std::ostringstream stream;
-                     stream << "ExecutionOptions(stream=" << from_stream(self.stream_)
-                            << ", storage="
-                            << heongpu::detail::name(self.storage_)
-                            << ", keep_initial_condition="
-                            << (self.keep_initial_condition_ ? "True" : "False")
-                            << ")";
+                     stream
+                         << "ExecutionOptions(stream="
+                         << from_stream(self.stream_)
+                         << ", storage=" << heongpu::detail::name(self.storage_)
+                         << ", keep_initial_condition="
+                         << (self.keep_initial_condition_ ? "True" : "False")
+                         << ")";
                      return stream.str();
                  });
 
@@ -254,11 +264,12 @@ namespace heongpu_py
                  "Creates a stream; a non-blocking stream does not "
                  "synchronize with the legacy default stream.")
             .def_prop_ro(
-                "handle", [](const Stream& self)
-                { return from_stream(self.get()); },
+                "handle",
+                [](const Stream& self) { return from_stream(self.get()); },
                 "The cudaStream_t handle as an int.")
             .def(
-                "__cuda_stream__", [](const Stream& self)
+                "__cuda_stream__",
+                [](const Stream& self)
                 { return std::make_pair(0, from_stream(self.get())); },
                 "CUDA stream protocol: returns (0, handle).")
             .def("synchronize", &Stream::synchronize,
@@ -269,12 +280,17 @@ namespace heongpu_py
                  "destroyed by shutdown(), since HEonGPU objects created on "
                  "it still use it when they are freed.")
             .def_prop_ro("closed", &Stream::closed)
-            .def("__enter__", [](Stream& self) -> Stream& { return self; },
-                 nb::rv_policy::reference)
-            .def("__exit__",
-                 [](Stream& self, nb::handle, nb::handle, nb::handle)
-                 { self.close(); },
-                 nb::arg().none(), nb::arg().none(), nb::arg().none())
+            .def(
+                "__enter__", [](Stream& self) -> Stream& { return self; },
+                nb::rv_policy::reference)
+            .def(
+                "__exit__",
+                [](Stream& self, nb::handle, nb::handle, nb::handle)
+                {
+                    nb::gil_scoped_release release;
+                    self.close();
+                },
+                nb::arg().none(), nb::arg().none(), nb::arg().none())
             .def("__int__",
                  [](const Stream& self) { return from_stream(self.get()); });
 
@@ -298,8 +314,9 @@ namespace heongpu_py
             "Returns the number of CUDA devices (0 if there is no usable "
             "device or driver).");
         m.def(
-            "set_device", [](int device)
-            { HEONGPU_PY_CUDA_CHECK(cudaSetDevice(device)); }, "device"_a,
+            "set_device",
+            [](int device) { HEONGPU_PY_CUDA_CHECK(cudaSetDevice(device)); },
+            "device"_a,
             "Selects the CUDA device of the calling thread. Select it before "
             "creating any HEonGPU object.");
         m.def(
@@ -417,8 +434,7 @@ namespace heongpu_py
                             << ", set_as_rmm_default="
                             << (self.set_as_rmm_default ? "True" : "False")
                             << ", raise_kernel_stack_size="
-                            << (self.raise_kernel_stack_size ? "True"
-                                                             : "False")
+                            << (self.raise_kernel_stack_size ? "True" : "False")
                             << ")";
                      return stream.str();
                  });
