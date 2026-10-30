@@ -736,7 +736,9 @@ namespace heongpu_py
                 "switch_stream",
                 [](Ciphertext& self, nb::handle stream)
                 { self.switch_stream(to_stream(stream)); },
-                "stream"_a, "Uses another stream for the data.")
+                nb::arg("stream").none(),
+                "Uses another stream (None: the default stream) for the "
+                "data.")
             .def(
                 "get_data",
                 [](Ciphertext& self, nb::handle stream)

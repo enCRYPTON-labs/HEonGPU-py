@@ -246,6 +246,7 @@ namespace heongpu_py
                    cudaStream_t s = to_stream(stream);
                    nb::gil_scoped_release release;
                    self.store_in_device(s);
+                   HEONGPU_PY_CUDA_CHECK(cudaStreamSynchronize(s));
                },
                "stream"_a = nb::none(),
                "Moves the data to GPU memory.")
@@ -255,7 +256,9 @@ namespace heongpu_py
                 {
                     cudaStream_t s = to_stream(stream);
                     nb::gil_scoped_release release;
+                    // The copy into pinned host memory is asynchronous.
                     self.store_in_host(s);
+                    HEONGPU_PY_CUDA_CHECK(cudaStreamSynchronize(s));
                 },
                 "stream"_a = nb::none(), "Moves the data to host memory.")
             .def_prop_ro("is_on_device", &T::is_on_device,
@@ -268,12 +271,21 @@ namespace heongpu_py
      */
     template <typename T, typename Class> void def_copy(Class& cls)
     {
-        cls.def("__copy__", [](const T& self) { return T(self); })
-            .def("__deepcopy__",
-                 [](const T& self, nb::handle) { return T(self); }, "memo"_a)
+        // The C++ copy constructors copy device data asynchronously on the
+        // stream of the source; the copy is complete when it is returned.
+        auto copy = [](const T& self)
+        {
+            nb::gil_scoped_release release;
+            T result(self);
+            HEONGPU_PY_CUDA_CHECK(cudaDeviceSynchronize());
+            return result;
+        };
+        cls.def("__copy__", copy)
             .def(
-                "copy", [](const T& self) { return T(self); },
-                "Returns a copy (the data is copied).");
+                "__deepcopy__",
+                [copy](const T& self, nb::handle) { return copy(self); },
+                "memo"_a)
+            .def("copy", copy, "Returns a copy (the data is copied).");
     }
 
 } // namespace heongpu_py
