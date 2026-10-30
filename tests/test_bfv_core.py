@@ -721,3 +721,11 @@ def test_large_ring(rng):
     assert large.slot_count == 32768
     values = large.random(rng)
     np.testing.assert_array_equal(large.decrypt(large.encrypt(values)), values)
+
+
+def test_ungenerated_objects_raise(setup):
+    context = setup.context
+    with pytest.raises(hg.StateError):
+        setup.encoder.decode(bfv.Plaintext())
+    with pytest.raises(hg.StateError):
+        bfv.Encryptor(context, bfv.PublicKey(context))

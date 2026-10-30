@@ -4,6 +4,7 @@
 // Developer: Alişah Özcan
 
 #include "common.h"
+#include "generated.h"
 
 #include <optional>
 
@@ -644,6 +645,7 @@ namespace heongpu_py
                 "encrypt",
                 [](const Session& self, const Plaintext& plain)
                 {
+                    require_generated(plain);
                     nb::gil_scoped_release release;
                     return wrap_result(self, self.encrypt(plain));
                 },

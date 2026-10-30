@@ -306,3 +306,21 @@ def test_raw_data_waits_for_the_stream(ckks_setup, rng):
     data = cipher.get_data()
     stream.synchronize()
     np.testing.assert_array_equal(data, cipher.get_data())
+
+
+@pytest.mark.parametrize("case", ["decode", "encrypt", "relin", "switch"])
+def test_ungenerated_objects_raise(ckks_setup, case):
+    context = ckks_setup.context
+    cipher = ckks_setup.encrypt([1.0])
+    operator = ckks.ArithmeticOperator(context, ckks_setup.encoder)
+    with pytest.raises(hg.StateError):
+        if case == "decode":
+            ckks_setup.encoder.decode(ckks.Plaintext())
+        elif case == "encrypt":
+            ckks.Encryptor(context, ckks.PublicKey(context))
+        elif case == "relin":
+            operator.relinearize(
+                operator.multiply(cipher, cipher), ckks.RelinKey(context)
+            )
+        else:
+            operator.keyswitch(cipher, ckks.SwitchKey(context))

@@ -4,6 +4,7 @@
 // Developer: Alişah Özcan
 
 #include "common.h"
+#include "generated.h"
 
 namespace heongpu_py
 {
@@ -47,6 +48,7 @@ namespace heongpu_py
            [](LogicOperator& self, const Ciphertext& a, const Ciphertext& b,   \
               const RelinKey& relin_key, nb::handle options)                   \
            {                                                                   \
+               require_generated(relin_key);                                   \
                heongpu::ExecutionOptions opts = to_options(options);           \
                nb::gil_scoped_release release;                                 \
                Ciphertext output(a);                                           \
@@ -60,6 +62,7 @@ namespace heongpu_py
             [](LogicOperator& self, const Ciphertext& a, const Plaintext& b,   \
                nb::handle options)                                             \
             {                                                                  \
+                require_generated(b);                                          \
                 heongpu::ExecutionOptions opts = to_options(options);          \
                 nb::gil_scoped_release release;                                \
                 Ciphertext output(a);                                          \
@@ -72,6 +75,7 @@ namespace heongpu_py
             [](LogicOperator& self, Ciphertext& a, const Ciphertext& b,        \
                const RelinKey& relin_key, nb::handle options)                  \
             {                                                                  \
+                require_generated(relin_key);                                  \
                 heongpu::ExecutionOptions opts = to_options(options);          \
                 nb::gil_scoped_release release;                                \
                 self.NAME##_inplace(a, b, relin_key, opts);                    \
@@ -83,6 +87,7 @@ namespace heongpu_py
             [](LogicOperator& self, Ciphertext& a, const Plaintext& b,         \
                nb::handle options)                                             \
             {                                                                  \
+                require_generated(b);                                          \
                 heongpu::ExecutionOptions opts = to_options(options);          \
                 nb::gil_scoped_release release;                                \
                 self.NAME##_inplace(a, b, opts);                               \
@@ -173,6 +178,7 @@ namespace heongpu_py
                 [](ArithmeticOperator& self, const Ciphertext& a,
                    const Plaintext& b, nb::handle options)
                 {
+                    require_generated(b);
                     heongpu::ExecutionOptions opts = to_options(options);
                     nb::gil_scoped_release release;
                     return self.add_plain(a, b, opts);
@@ -184,6 +190,7 @@ namespace heongpu_py
                 [](ArithmeticOperator& self, Ciphertext& a, const Plaintext& b,
                    nb::handle options)
                 {
+                    require_generated(b);
                     heongpu::ExecutionOptions opts = to_options(options);
                     nb::gil_scoped_release release;
                     self.add_plain_inplace(a, b, opts);
@@ -195,6 +202,7 @@ namespace heongpu_py
                 [](ArithmeticOperator& self, const Ciphertext& a,
                    const Plaintext& b, nb::handle options)
                 {
+                    require_generated(b);
                     heongpu::ExecutionOptions opts = to_options(options);
                     nb::gil_scoped_release release;
                     return self.sub_plain(a, b, opts);
@@ -206,6 +214,7 @@ namespace heongpu_py
                 [](ArithmeticOperator& self, Ciphertext& a, const Plaintext& b,
                    nb::handle options)
                 {
+                    require_generated(b);
                     heongpu::ExecutionOptions opts = to_options(options);
                     nb::gil_scoped_release release;
                     self.sub_plain_inplace(a, b, opts);
@@ -243,6 +252,7 @@ namespace heongpu_py
                 [](ArithmeticOperator& self, const Ciphertext& a,
                    const Plaintext& b, nb::handle options)
                 {
+                    require_generated(b);
                     heongpu::ExecutionOptions opts = to_options(options);
                     nb::gil_scoped_release release;
                     return self.multiply_plain(a, b, opts);
@@ -254,6 +264,7 @@ namespace heongpu_py
                 [](ArithmeticOperator& self, Ciphertext& a, const Plaintext& b,
                    nb::handle options)
                 {
+                    require_generated(b);
                     heongpu::ExecutionOptions opts = to_options(options);
                     nb::gil_scoped_release release;
                     self.multiply_plain_inplace(a, b, opts);
@@ -265,6 +276,7 @@ namespace heongpu_py
                 [](ArithmeticOperator& self, const Ciphertext& a,
                    const RelinKey& relin_key, nb::handle options)
                 {
+                    require_generated(relin_key);
                     heongpu::ExecutionOptions opts = to_options(options);
                     nb::gil_scoped_release release;
                     Ciphertext output(a);
@@ -278,6 +290,7 @@ namespace heongpu_py
                 [](ArithmeticOperator& self, Ciphertext& a,
                    const RelinKey& relin_key, nb::handle options)
                 {
+                    require_generated(relin_key);
                     heongpu::ExecutionOptions opts = to_options(options);
                     nb::gil_scoped_release release;
                     self.relinearize_inplace(a, relin_key, opts);
@@ -292,6 +305,7 @@ namespace heongpu_py
                 [](ArithmeticOperator& self, const Ciphertext& a,
                    const GaloisKey& galois_key, int shift, nb::handle options)
                 {
+                    require_generated(galois_key);
                     heongpu::ExecutionOptions opts = to_options(options);
                     nb::gil_scoped_release release;
                     return self.rotate_rows(a, galois_key, shift, opts);
@@ -306,6 +320,7 @@ namespace heongpu_py
                 [](ArithmeticOperator& self, Ciphertext& a,
                    const GaloisKey& galois_key, int shift, nb::handle options)
                 {
+                    require_generated(galois_key);
                     heongpu::ExecutionOptions opts = to_options(options);
                     nb::gil_scoped_release release;
                     self.rotate_rows_inplace(a, galois_key, shift, opts);
@@ -317,6 +332,7 @@ namespace heongpu_py
                    const GaloisKey& galois_key, nb::handle shifts,
                    nb::handle options)
                 {
+                    require_generated(galois_key);
                     std::vector<int> steps = to_int_vector(shifts, "shifts");
                     heongpu::ExecutionOptions opts = to_options(options);
                     nb::gil_scoped_release release;
@@ -331,6 +347,7 @@ namespace heongpu_py
                 [](ArithmeticOperator& self, const Ciphertext& a,
                    const GaloisKey& galois_key, nb::handle options)
                 {
+                    require_generated(galois_key);
                     heongpu::ExecutionOptions opts = to_options(options);
                     nb::gil_scoped_release release;
                     return self.rotate_columns(a, galois_key, opts);
@@ -343,6 +360,7 @@ namespace heongpu_py
                    const GaloisKey& galois_key, int galois_element,
                    nb::handle options)
                 {
+                    require_generated(galois_key);
                     heongpu::ExecutionOptions opts = to_options(options);
                     const ContextPtr& context = OperatorAccess::context(self);
                     nb::gil_scoped_release release;
@@ -361,6 +379,7 @@ namespace heongpu_py
                    const GaloisKey& galois_key, int galois_element,
                    nb::handle options)
                 {
+                    require_generated(galois_key);
                     heongpu::ExecutionOptions opts = to_options(options);
                     nb::gil_scoped_release release;
                     self.apply_galois_inplace(a, galois_key, galois_element,
@@ -373,6 +392,7 @@ namespace heongpu_py
                 [](ArithmeticOperator& self, const Ciphertext& a,
                    const SwitchKey& switch_key, nb::handle options)
                 {
+                    require_generated(switch_key);
                     heongpu::ExecutionOptions opts = to_options(options);
                     const ContextPtr& context = OperatorAccess::context(self);
                     nb::gil_scoped_release release;
@@ -409,6 +429,7 @@ namespace heongpu_py
                 [](ArithmeticOperator& self, const Ciphertext& a,
                    const GaloisKey& galois_key, nb::handle options)
                 {
+                    require_generated(galois_key);
                     heongpu::ExecutionOptions opts = to_options(options);
                     nb::gil_scoped_release release;
                     return self.sum_slots(a, galois_key, opts);
@@ -423,6 +444,8 @@ namespace heongpu_py
                    const Ciphertext& b, const RelinKey& relin_key,
                    const GaloisKey& galois_key, nb::handle options)
                 {
+                    require_generated(relin_key);
+                    require_generated(galois_key);
                     heongpu::ExecutionOptions opts = to_options(options);
                     nb::gil_scoped_release release;
                     return self.inner_product(a, b, relin_key, galois_key,
@@ -438,6 +461,8 @@ namespace heongpu_py
                    const Plaintext& b, const GaloisKey& galois_key,
                    nb::handle options)
                 {
+                    require_generated(galois_key);
+                    require_generated(b);
                     heongpu::ExecutionOptions opts = to_options(options);
                     nb::gil_scoped_release release;
                     return self.inner_product(a, b, galois_key, opts);
@@ -454,6 +479,7 @@ namespace heongpu_py
                 [](ArithmeticOperator& self, const Plaintext& a,
                    nb::handle options)
                 {
+                    require_generated(a);
                     heongpu::ExecutionOptions opts = to_options(options);
                     const ContextPtr& context = OperatorAccess::context(self);
                     nb::gil_scoped_release release;
@@ -483,6 +509,7 @@ namespace heongpu_py
                 "transform_to_ntt_inplace",
                 [](ArithmeticOperator& self, Plaintext& a, nb::handle options)
                 {
+                    require_generated(a);
                     heongpu::ExecutionOptions opts = to_options(options);
                     nb::gil_scoped_release release;
                     self.transform_to_ntt_inplace(a, opts);

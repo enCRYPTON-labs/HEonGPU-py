@@ -4,6 +4,7 @@
 // Developer: Alişah Özcan
 
 #include "common.h"
+#include "generated.h"
 
 namespace heongpu_py
 {
@@ -750,6 +751,7 @@ namespace heongpu_py
                 [](Encoder& self, const Plaintext& plain, bool is_signed,
                    nb::handle options) -> nb::object
                 {
+                    require_generated(plain);
                     heongpu::ExecutionOptions opts = to_options(options);
                     if (is_signed)
                     {
@@ -775,12 +777,20 @@ namespace heongpu_py
 
         nb::class_<Encryptor>(m, "Encryptor",
                               "Encrypts plaintexts with a public key.")
-            .def(nb::init<ContextPtr, const PublicKey&>(), "context"_a,
-                 "public_key"_a)
+            .def(
+                "__init__",
+                [](Encryptor* self, ContextPtr context,
+                   const PublicKey& public_key)
+                {
+                    require_generated(public_key);
+                    new (self) Encryptor(std::move(context), public_key);
+                },
+                "context"_a, "public_key"_a)
             .def(
                 "encrypt",
                 [](Encryptor& self, const Plaintext& plain, nb::handle options)
                 {
+                    require_generated(plain);
                     heongpu::ExecutionOptions opts = to_options(options);
                     nb::gil_scoped_release release;
                     return self.encrypt(plain, opts);

@@ -4,6 +4,7 @@
 // Developer: Alişah Özcan
 
 #include "common.h"
+#include "generated.h"
 
 #include <nanobind/stl/complex.h>
 #include <nanobind/stl/function.h>
@@ -130,6 +131,7 @@ namespace heongpu_py
                       const GaloisKey& galois_key, int shift,
                       nb::handle options)
                    {
+                       require_generated(galois_key);
                        return run(options,
                                   [&](const Options& opts) {
                                       return self.rotate(input, galois_key,
@@ -146,6 +148,7 @@ namespace heongpu_py
                     [](Op& self, Ciphertext& input, const GaloisKey& galois_key,
                        int shift, nb::handle options)
                     {
+                        require_generated(galois_key);
                         run(options,
                             [&](const Options& opts) {
                                 self.rotate_inplace(input, galois_key, shift,
@@ -160,6 +163,7 @@ namespace heongpu_py
                        const GaloisKey& galois_key, int galois_element,
                        nb::handle options)
                     {
+                        require_generated(galois_key);
                         return run(
                             options,
                             [&](const Options& opts)
@@ -179,6 +183,7 @@ namespace heongpu_py
                     [](Op& self, Ciphertext& input, const GaloisKey& galois_key,
                        int galois_element, nb::handle options)
                     {
+                        require_generated(galois_key);
                         run(options,
                             [&](const Options& opts) {
                                 self.apply_galois_inplace(input, galois_key,
@@ -193,6 +198,7 @@ namespace heongpu_py
                     [](Op& self, const Ciphertext& input,
                        const SwitchKey& switch_key, nb::handle options)
                     {
+                        require_generated(switch_key);
                         return run(
                             options,
                             [&](const Options& opts)
@@ -222,6 +228,7 @@ namespace heongpu_py
                     "mod_drop",
                     [](Op& self, const Plaintext& input, nb::handle options)
                     {
+                        require_generated(input);
                         return run(options, [&](const Options& opts)
                                    { return self.mod_drop(input, opts); });
                     },
@@ -240,6 +247,7 @@ namespace heongpu_py
                     "mod_drop_inplace",
                     [](Op& self, Plaintext& input, nb::handle options)
                     {
+                        require_generated(input);
                         run(options, [&](const Options& opts)
                             { self.mod_drop_inplace(input, opts); });
                     },
@@ -480,6 +488,7 @@ namespace heongpu_py
                    [](ArithmeticOperator& self, const Ciphertext& input1,
                       const Plaintext& input2, nb::handle options)
                    {
+                       require_generated(input2);
                        return run(
                            options, [&](const Options& opts)
                            { return self.add_plain(input1, input2, opts); });
@@ -520,6 +529,7 @@ namespace heongpu_py
                     [](ArithmeticOperator& self, Ciphertext& input1,
                        const Plaintext& input2, nb::handle options)
                     {
+                        require_generated(input2);
                         run(options, [&](const Options& opts)
                             { self.add_plain_inplace(input1, input2, opts); });
                     },
@@ -554,6 +564,7 @@ namespace heongpu_py
                     [](ArithmeticOperator& self, const Ciphertext& input1,
                        const Plaintext& input2, nb::handle options)
                     {
+                        require_generated(input2);
                         return run(
                             options, [&](const Options& opts)
                             { return self.sub_plain(input1, input2, opts); });
@@ -594,6 +605,7 @@ namespace heongpu_py
                     [](ArithmeticOperator& self, Ciphertext& input1,
                        const Plaintext& input2, nb::handle options)
                     {
+                        require_generated(input2);
                         run(options, [&](const Options& opts)
                             { self.sub_plain_inplace(input1, input2, opts); });
                     },
@@ -628,6 +640,7 @@ namespace heongpu_py
                     [](ArithmeticOperator& self, const Ciphertext& input1,
                        const Plaintext& input2, nb::handle options)
                     {
+                        require_generated(input2);
                         return run(options,
                                    [&](const Options& opts) {
                                        return self.multiply_plain(input1,
@@ -684,6 +697,7 @@ namespace heongpu_py
                     [](ArithmeticOperator& self, Ciphertext& input1,
                        const Plaintext& input2, nb::handle options)
                     {
+                        require_generated(input2);
                         run(options,
                             [&](const Options& opts) {
                                 self.multiply_plain_inplace(input1, input2,
@@ -782,6 +796,7 @@ namespace heongpu_py
                    [](ArithmeticOperator& self, const Ciphertext& input,
                       const RelinKey& relin_key, nb::handle options)
                    {
+                       require_generated(relin_key);
                        return run(options,
                                   [&](const Options& opts)
                                   {
@@ -799,6 +814,7 @@ namespace heongpu_py
                     [](ArithmeticOperator& self, Ciphertext& input,
                        const RelinKey& relin_key, nb::handle options)
                     {
+                        require_generated(relin_key);
                         run(options,
                             [&](const Options& opts) {
                                 self.relinearize_inplace(input, relin_key,
@@ -845,6 +861,7 @@ namespace heongpu_py
                       const GaloisKey& galois_key, nb::handle shifts,
                       nb::handle options)
                    {
+                       require_generated(galois_key);
                        std::vector<int> steps = to_int_vector(shifts, "shifts");
                        return run(options,
                                   [&](const Options& opts) {
@@ -863,6 +880,7 @@ namespace heongpu_py
                     [](ArithmeticOperator& self, const Ciphertext& input,
                        const GaloisKey& galois_key, nb::handle options)
                     {
+                        require_generated(galois_key);
                         return run(options,
                                    [&](const Options& opts) {
                                        return self.conjugate(input, galois_key,
@@ -877,6 +895,7 @@ namespace heongpu_py
                     [](ArithmeticOperator& self, const Ciphertext& input,
                        const GaloisKey& galois_key, nb::handle options)
                     {
+                        require_generated(galois_key);
                         return run(options,
                                    [&](const Options& opts) {
                                        return self.sum_slots(input, galois_key,
@@ -892,6 +911,8 @@ namespace heongpu_py
                        const Ciphertext& input2, const RelinKey& relin_key,
                        const GaloisKey& galois_key, nb::handle options)
                     {
+                        require_generated(relin_key);
+                        require_generated(galois_key);
                         return run(options,
                                    [&](const Options& opts) {
                                        return self.inner_product(
@@ -909,6 +930,8 @@ namespace heongpu_py
                        const Plaintext& input2, const GaloisKey& galois_key,
                        nb::handle options)
                     {
+                        require_generated(galois_key);
+                        require_generated(input2);
                         return run(options,
                                    [&](const Options& opts) {
                                        return self.inner_product(
@@ -928,6 +951,7 @@ namespace heongpu_py
                       nb::handle coefficients, const RelinKey& relin_key,
                       nb::handle options)
                    {
+                       require_generated(relin_key);
                        std::vector<double> values =
                            to_double_vector(coefficients, "coefficients");
                        return run(options,
@@ -947,6 +971,7 @@ namespace heongpu_py
                        nb::callable function, double a, double b, int degree,
                        const RelinKey& relin_key, nb::handle options)
                     {
+                        require_generated(relin_key);
                         std::function<double(double)> f =
                             real_function(function);
                         return run(options,
@@ -967,6 +992,7 @@ namespace heongpu_py
                        nb::handle coefficients, double a, double b,
                        const RelinKey& relin_key, nb::handle options)
                     {
+                        require_generated(relin_key);
                         std::vector<double> values =
                             to_double_vector(coefficients, "coefficients");
                         return run(options,
@@ -1013,6 +1039,7 @@ namespace heongpu_py
                        const GaloisKey& galois_key,
                        TransformContext* transform_context, nb::handle options)
                     {
+                        require_generated(galois_key);
                         return run(options,
                                    [&](const Options& opts)
                                    {
@@ -1040,6 +1067,7 @@ namespace heongpu_py
                        Ciphertext& input2, const GaloisKey& galois_key,
                        TransformContext* transform_context, nb::handle options)
                     {
+                        require_generated(galois_key);
                         return run(options,
                                    [&](const Options& opts)
                                    {

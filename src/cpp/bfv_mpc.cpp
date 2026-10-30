@@ -4,6 +4,7 @@
 // Developer: Alişah Özcan
 
 #include "common.h"
+#include "generated.h"
 
 #include <unordered_map>
 
@@ -676,6 +677,9 @@ namespace heongpu_py
                     HEONGPU_PY_CUDA_CHECK(cudaDeviceSynchronize());
                     Plaintext plain(self.context, opts);
                     self.manager.decrypt(partials, plain, opts);
+                    // HEonGPU fills the plaintext without marking it as
+                    // generated.
+                    mark_generated(plain);
                     finish(opts);
                     return plain;
                 },

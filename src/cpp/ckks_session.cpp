@@ -4,6 +4,7 @@
 // Developer: Alişah Özcan
 
 #include "common.h"
+#include "generated.h"
 
 #include <cmath>
 #include <exception>
@@ -250,6 +251,7 @@ namespace heongpu_py
             if (nb::isinstance<Plaintext>(values))
             {
                 const Plaintext& plain = nb::cast<const Plaintext&>(values);
+                require_generated(plain);
                 nb::gil_scoped_release release;
                 return self.encrypt(plain);
             }
