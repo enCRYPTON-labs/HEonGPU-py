@@ -121,7 +121,7 @@ y = y.rotate(2)                    # rotations need their Galois keys
 print(y.levels_left)               # 2
 
 expected = np.roll((a * a - 0.5 * a + 1.0) * a, -2)
-print(np.max(np.abs(session.decrypt(y) - expected)))   # about 1e-7
+print(np.max(np.abs(session.decrypt(y) - expected)))   # about 1e-8
 ```
 
 Every product uses a level. Keep `levels_left` at 0 or above: a ciphertext
