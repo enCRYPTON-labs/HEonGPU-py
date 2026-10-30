@@ -56,7 +56,8 @@ if(NOT HEONGPU_PY_HEONGPU_TARGET)
     )
     FetchContent_MakeAvailable(heongpu)
     set(HEONGPU_PY_HEONGPU_TARGET heongpu)
-    set(HEONGPU_PY_HEONGPU_VERSION ${HEonGPU_VERSION})
+    # project() of HEonGPU sets its version only in its own directory scope.
+    get_target_property(HEONGPU_PY_HEONGPU_VERSION heongpu VERSION)
     set(HEONGPU_PY_HEONGPU_FETCHED ON)
 endif()
 
