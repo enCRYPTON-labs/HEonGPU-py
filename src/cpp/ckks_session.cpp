@@ -564,7 +564,11 @@ namespace heongpu_py
                         [](const SC& a, double b) { return a + b; },
                         [](const SC& a, const Values& b) { return a + b; });
                 },
-                nb::is_operator())
+                nb::is_operator(),
+                nb::sig(
+                    "def __add__(self, other: SessionCiphertext | float | "
+                    "collections.abc.Sequence[float] | numpy.ndarray, /) -> "
+                    "SessionCiphertext"))
             .def(
                 "__radd__",
                 [](const SC& self, nb::handle other)
@@ -575,7 +579,11 @@ namespace heongpu_py
                         [](const SC& a, double b) { return b + a; },
                         [](const SC& a, const Values& b) { return b + a; });
                 },
-                nb::is_operator())
+                nb::is_operator(),
+                nb::sig(
+                    "def __radd__(self, other: SessionCiphertext | float | "
+                    "collections.abc.Sequence[float] | numpy.ndarray, /) -> "
+                    "SessionCiphertext"))
             .def(
                 "__sub__",
                 [](const SC& self, nb::handle other)
@@ -586,7 +594,11 @@ namespace heongpu_py
                         [](const SC& a, double b) { return a - b; },
                         [](const SC& a, const Values& b) { return a - b; });
                 },
-                nb::is_operator())
+                nb::is_operator(),
+                nb::sig(
+                    "def __sub__(self, other: SessionCiphertext | float | "
+                    "collections.abc.Sequence[float] | numpy.ndarray, /) -> "
+                    "SessionCiphertext"))
             .def(
                 "__rsub__",
                 [](const SC& self, nb::handle other)
@@ -597,7 +609,11 @@ namespace heongpu_py
                         [](const SC& a, double b) { return b - a; },
                         [](const SC& a, const Values& b) { return b - a; });
                 },
-                nb::is_operator())
+                nb::is_operator(),
+                nb::sig(
+                    "def __rsub__(self, other: SessionCiphertext | float | "
+                    "collections.abc.Sequence[float] | numpy.ndarray, /) -> "
+                    "SessionCiphertext"))
             .def(
                 "__mul__",
                 [](const SC& self, nb::handle other)
@@ -608,7 +624,11 @@ namespace heongpu_py
                         [](const SC& a, double b) { return a * b; },
                         [](const SC& a, const Values& b) { return a * b; });
                 },
-                nb::is_operator())
+                nb::is_operator(),
+                nb::sig(
+                    "def __mul__(self, other: SessionCiphertext | float | "
+                    "collections.abc.Sequence[float] | numpy.ndarray, /) -> "
+                    "SessionCiphertext"))
             .def(
                 "__rmul__",
                 [](const SC& self, nb::handle other)
@@ -619,7 +639,11 @@ namespace heongpu_py
                         [](const SC& a, double b) { return b * a; },
                         [](const SC& a, const Values& b) { return b * a; });
                 },
-                nb::is_operator())
+                nb::is_operator(),
+                nb::sig(
+                    "def __rmul__(self, other: SessionCiphertext | float | "
+                    "collections.abc.Sequence[float] | numpy.ndarray, /) -> "
+                    "SessionCiphertext"))
             .def(
                 "__truediv__",
                 [](const SC& self, nb::handle other) -> nb::object
@@ -681,7 +705,11 @@ namespace heongpu_py
                         [](SC& a, double b) { a += b; },
                         [](SC& a, const Values& b) { a += b; });
                 },
-                nb::is_operator())
+                nb::is_operator(),
+                nb::sig(
+                    "def __iadd__(self, other: SessionCiphertext | float | "
+                    "collections.abc.Sequence[float] | numpy.ndarray, /) -> "
+                    "SessionCiphertext"))
             .def(
                 "__isub__",
                 [](nb::handle self, nb::handle other)
@@ -691,7 +719,11 @@ namespace heongpu_py
                         [](SC& a, double b) { a -= b; },
                         [](SC& a, const Values& b) { a -= b; });
                 },
-                nb::is_operator())
+                nb::is_operator(),
+                nb::sig(
+                    "def __isub__(self, other: SessionCiphertext | float | "
+                    "collections.abc.Sequence[float] | numpy.ndarray, /) -> "
+                    "SessionCiphertext"))
             .def(
                 "__imul__",
                 [](nb::handle self, nb::handle other)
@@ -701,7 +733,11 @@ namespace heongpu_py
                         [](SC& a, double b) { a *= b; },
                         [](SC& a, const Values& b) { a *= b; });
                 },
-                nb::is_operator());
+                nb::is_operator(),
+                nb::sig(
+                    "def __imul__(self, other: SessionCiphertext | float | "
+                    "collections.abc.Sequence[float] | numpy.ndarray, /) -> "
+                    "SessionCiphertext"));
 
         // --------------------------------------------------------------
         // Session

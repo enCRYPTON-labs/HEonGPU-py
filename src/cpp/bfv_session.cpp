@@ -547,21 +547,48 @@ namespace heongpu_py
                          << " plain_modulus=" << self.plain_modulus << ">";
                      return stream.str();
                  })
-            .def("__add__", &binary_operator<BinaryOp::add>, nb::is_operator())
-            .def("__radd__", &binary_operator<BinaryOp::add>, nb::is_operator())
-            .def("__sub__", &binary_operator<BinaryOp::sub>, nb::is_operator())
+            .def("__add__", &binary_operator<BinaryOp::add>, nb::is_operator(),
+                 nb::sig("def __add__(self, other: SessionCiphertext | int | "
+                         "collections.abc.Sequence[int] | numpy.ndarray, /) -> "
+                         "SessionCiphertext"))
+            .def("__radd__", &binary_operator<BinaryOp::add>, nb::is_operator(),
+                 nb::sig("def __radd__(self, other: SessionCiphertext | int | "
+                         "collections.abc.Sequence[int] | numpy.ndarray, /) -> "
+                         "SessionCiphertext"))
+            .def("__sub__", &binary_operator<BinaryOp::sub>, nb::is_operator(),
+                 nb::sig("def __sub__(self, other: SessionCiphertext | int | "
+                         "collections.abc.Sequence[int] | numpy.ndarray, /) -> "
+                         "SessionCiphertext"))
             .def("__rsub__", &binary_operator<BinaryOp::rsub>,
-                 nb::is_operator())
+                 nb::is_operator(),
+                 nb::sig("def __rsub__(self, other: SessionCiphertext | int | "
+                         "collections.abc.Sequence[int] | numpy.ndarray, /) -> "
+                         "SessionCiphertext"))
             .def("__mul__", &binary_operator<BinaryOp::multiply>,
-                 nb::is_operator())
+                 nb::is_operator(),
+                 nb::sig("def __mul__(self, other: SessionCiphertext | int | "
+                         "collections.abc.Sequence[int] | numpy.ndarray, /) -> "
+                         "SessionCiphertext"))
             .def("__rmul__", &binary_operator<BinaryOp::multiply>,
-                 nb::is_operator())
+                 nb::is_operator(),
+                 nb::sig("def __rmul__(self, other: SessionCiphertext | int | "
+                         "collections.abc.Sequence[int] | numpy.ndarray, /) -> "
+                         "SessionCiphertext"))
             .def("__iadd__", &inplace_operator<BinaryOp::add>,
-                 nb::is_operator())
+                 nb::is_operator(),
+                 nb::sig("def __iadd__(self, other: SessionCiphertext | int | "
+                         "collections.abc.Sequence[int] | numpy.ndarray, /) -> "
+                         "SessionCiphertext"))
             .def("__isub__", &inplace_operator<BinaryOp::sub>,
-                 nb::is_operator())
+                 nb::is_operator(),
+                 nb::sig("def __isub__(self, other: SessionCiphertext | int | "
+                         "collections.abc.Sequence[int] | numpy.ndarray, /) -> "
+                         "SessionCiphertext"))
             .def("__imul__", &inplace_operator<BinaryOp::multiply>,
-                 nb::is_operator())
+                 nb::is_operator(),
+                 nb::sig("def __imul__(self, other: SessionCiphertext | int | "
+                         "collections.abc.Sequence[int] | numpy.ndarray, /) -> "
+                         "SessionCiphertext"))
             .def(
                 "__neg__",
                 [](const SessionCipher& self)
