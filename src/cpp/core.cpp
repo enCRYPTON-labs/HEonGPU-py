@@ -344,9 +344,9 @@ namespace heongpu_py
         nb::class_<heongpu::MemoryPoolConfig>(
             m, "MemoryPoolConfig",
             "Sizes of the device and host memory pools. Fractions are of the "
-            "total memory (0.0 to 1.0, or 0 to 100 as a percentage); byte "
-            "sizes take precedence over fractions. Unset values keep the "
-            "HEonGPU defaults.")
+            "memory that is free when the pool is created (0.0 to 1.0, or 0 "
+            "to 100 as a percentage); byte sizes take precedence over "
+            "fractions. Unset values keep the HEonGPU defaults.")
             .def(
                 "__init__",
                 [](heongpu::MemoryPoolConfig* self,
