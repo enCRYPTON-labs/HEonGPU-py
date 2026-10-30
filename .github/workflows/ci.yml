@@ -1,0 +1,74 @@
+name: CI
+
+# Builds the package with HEonGPU built from source, installs the wheel and
+# runs the tests that do not need a GPU. The runners have no GPU; run the full
+# test suite on a machine with one.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  wheel:
+    name: CUDA ${{ matrix.cuda }}, Python ${{ matrix.python }}
+    runs-on: ubuntu-24.04
+    container: nvidia/cuda:${{ matrix.cuda }}-devel-ubuntu22.04
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - cuda: 13.4.3
+            python: "3.10"
+          # The oldest supported CUDA version.
+          - cuda: 12.8.2
+            python: "3.10"
+    steps:
+      - name: Install system packages
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            git python3-pip python3-dev libgmp-dev libntl-dev libssl-dev zlib1g-dev
+          python3 -m pip install --no-cache-dir --upgrade pip
+
+      - uses: actions/checkout@v4
+
+      # Without a GPU, the architecture cannot be detected.
+      - name: Build the wheel
+        run: |
+          python3 -m pip wheel . --no-deps -w dist \
+            -Ccmake.define.HEONGPU_PY_HEONGPU_PROVIDER=FETCH \
+            -Ccmake.define.CMAKE_CUDA_ARCHITECTURES=89
+
+      - name: Install the wheel
+        run: python3 -m pip install dist/*.whl pytest
+
+      # The package is in src/, so the tests import the installed wheel.
+      - name: Run the tests that need no GPU
+        run: python3 -m pytest -m nogpu -p no:cacheprovider
+
+  sdist:
+    name: Source distribution
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build the source distribution
+        run: |
+          python -m pip install build
+          python -m build --sdist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sdist
+          path: dist/*.tar.gz
