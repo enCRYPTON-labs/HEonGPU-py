@@ -461,6 +461,9 @@ namespace heongpu_py
                     require_shares(shares, "public key shares");
                     heongpu::ExecutionOptions opts = to_options(options);
                     nb::gil_scoped_release release;
+                    // The list items are copies made on the streams of the
+                    // originals; wait for them.
+                    HEONGPU_PY_CUDA_CHECK(cudaDeviceSynchronize());
                     PublicKey key(self.context);
                     self.manager.assemble_public_key_share(shares, key, opts);
                     finish(opts);
@@ -497,6 +500,9 @@ namespace heongpu_py
                     heongpu::ExecutionOptions opts = to_options(options);
                     RNGSeed key_seed = seed ? *seed : shares[0].seed();
                     nb::gil_scoped_release release;
+                    // The list items are copies made on the streams of the
+                    // originals; wait for them.
+                    HEONGPU_PY_CUDA_CHECK(cudaDeviceSynchronize());
                     MultipartyRelinKey key(self.context, key_seed);
                     self.manager.assemble_relin_key_init(shares, key, opts);
                     finish(opts);
@@ -537,6 +543,9 @@ namespace heongpu_py
                     require_shares(shares, "relinearization key shares");
                     heongpu::ExecutionOptions opts = to_options(options);
                     nb::gil_scoped_release release;
+                    // The list items are copies made on the streams of the
+                    // originals; wait for them.
+                    HEONGPU_PY_CUDA_CHECK(cudaDeviceSynchronize());
                     RelinKey key(self.context);
                     self.manager.assemble_relin_key_share(shares, common, key,
                                                           opts);
@@ -603,6 +612,9 @@ namespace heongpu_py
                     check_galois_shares(shares);
                     heongpu::ExecutionOptions opts = to_options(options);
                     nb::gil_scoped_release release;
+                    // The list items are copies made on the streams of the
+                    // originals; wait for them.
+                    HEONGPU_PY_CUDA_CHECK(cudaDeviceSynchronize());
                     // The collective key takes the rotations of the shares;
                     // its data is replaced by the aggregation.
                     GaloisKey key(static_cast<const GaloisKey&>(shares[0]));
@@ -659,6 +671,9 @@ namespace heongpu_py
                     }
                     heongpu::ExecutionOptions opts = to_options(options);
                     nb::gil_scoped_release release;
+                    // The list items are copies made on the streams of the
+                    // originals; wait for them.
+                    HEONGPU_PY_CUDA_CHECK(cudaDeviceSynchronize());
                     Plaintext plain(self.context, opts);
                     self.manager.decrypt(partials, plain, opts);
                     finish(opts);
@@ -707,6 +722,9 @@ namespace heongpu_py
                     require_relinearized(common);
                     heongpu::ExecutionOptions opts = to_options(options);
                     nb::gil_scoped_release release;
+                    // The list items are copies made on the streams of the
+                    // originals; wait for them.
+                    HEONGPU_PY_CUDA_CHECK(cudaDeviceSynchronize());
                     Ciphertext output(self.context, opts);
                     self.manager.distributed_bootstrapping_coordinator(
                         shares, common, output, seed, opts);
