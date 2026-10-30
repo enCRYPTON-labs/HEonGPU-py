@@ -16,7 +16,7 @@ Install HEonGPU 2.1 once (see its README), then build the extension module
 with CMake and run the tests against the build:
 
 ```bash
-python -m pip install nanobind numpy pytest
+python -m pip install "scikit-build-core>=0.11" "nanobind>=2.9" numpy pytest
 
 cmake -S . -B build -G Ninja \
     -D Python_EXECUTABLE="$(which python)" \
@@ -32,8 +32,13 @@ ln -sf "$PWD"/build/_heongpu*.so build/stage/heongpu/
 PYTHONPATH=build/stage python -m pytest
 ```
 
-Alternatively, `pip install --no-build-isolation -e .` installs an editable
-package that is rebuilt by `pip install` again.
+Alternatively, install an editable package (run the command again after
+changing the C++ sources):
+
+```bash
+CMAKE_PREFIX_PATH=/path/to/heongpu/install HEONGPU_PY_HEONGPU_PROVIDER=SYSTEM \
+    python -m pip install --no-build-isolation -e .
+```
 
 The bindings are in `src/cpp`: one file per part (`core.cpp`,
 `ckks_core.cpp`, `ckks_operator.cpp`, `ckks_session.cpp`, `ckks_mpc.cpp`, the
