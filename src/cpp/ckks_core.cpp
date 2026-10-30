@@ -370,6 +370,173 @@ namespace heongpu_py
             .def("scale", &Params::scale, "Returns 2^scale_bit_size.");
 
         // --------------------------------------------------------------
+        // Bootstrapping configuration
+        // --------------------------------------------------------------
+
+        nb::enum_<heongpu::SineType>(m, "SineType",
+                                     "Approximation of the modular reduction "
+                                     "in EvalMod.")
+            .value("COS1", heongpu::SineType::cos1);
+
+        nb::enum_<heongpu::PolyType>(m, "PolyType",
+                                     "Polynomial basis of an approximation.")
+            .value("MONOMIAL", heongpu::PolyType::monomial)
+            .value("CHEBYSHEV", heongpu::PolyType::chebyshev);
+
+        nb::enum_<heongpu::LinearTransformType>(
+            m, "LinearTransformType",
+            "The homomorphic encoding transforms of bootstrapping.")
+            .value("COEFFS_TO_SLOTS",
+                   heongpu::LinearTransformType::coeffs_to_slots)
+            .value("SLOTS_TO_COEFFS",
+                   heongpu::LinearTransformType::slots_to_coeffs);
+
+        nb::class_<heongpu::EncodingMatrixConfig>(
+            m, "EncodingMatrixConfig",
+            "Configuration of CoeffToSlot or SlotToCoeff: the level it "
+            "starts at, the baby-step giant-step ratio and the number of "
+            "pieces (levels) the transform is split into.")
+            .def(nb::init<>())
+            .def(nb::init<heongpu::LinearTransformType, int>(), "lt_type"_a,
+                 "level_start"_a)
+            .def(nb::init<heongpu::LinearTransformType, int, double>(),
+                 "lt_type"_a, "level_start"_a, "bsgs_ratio"_a)
+            .def(nb::init<heongpu::LinearTransformType, int, double, int>(),
+                 "lt_type"_a, "level_start"_a, "bsgs_ratio"_a, "piece"_a)
+            .def_rw("lt_type", &heongpu::EncodingMatrixConfig::lt_type_)
+            .def_rw("level_start", &heongpu::EncodingMatrixConfig::level_start_)
+            .def_rw("bsgs_ratio", &heongpu::EncodingMatrixConfig::bsgs_ratio_)
+            .def_rw("piece", &heongpu::EncodingMatrixConfig::piece_);
+
+        nb::class_<heongpu::EvalModConfig>(
+            m, "EvalModConfig",
+            "Configuration of EvalMod, the approximate modular reduction of "
+            "bootstrapping.")
+            .def(nb::init<>())
+            .def(nb::init<int>(), "level_start"_a,
+                 "The default configuration starting at level_start.")
+            .def(nb::init<Data64, int, double, int, int, int, int, double>(),
+                 "q"_a, "level_start"_a, "message_ratio"_a, "k"_a,
+                 "sine_degree"_a, "double_angle"_a, "arcsine_degree"_a,
+                 "scaling_factor"_a)
+            .def_rw("q", &heongpu::EvalModConfig::Q_)
+            .def_rw("level_start", &heongpu::EvalModConfig::level_start_)
+            .def_rw("message_ratio", &heongpu::EvalModConfig::message_ratio_)
+            .def_rw("k", &heongpu::EvalModConfig::K_)
+            .def_rw("sine_degree", &heongpu::EvalModConfig::sine_deg_)
+            .def_rw("double_angle", &heongpu::EvalModConfig::double_angle_)
+            .def_rw("arcsine_degree", &heongpu::EvalModConfig::arcsine_deg_)
+            .def_rw("scaling_factor", &heongpu::EvalModConfig::scaling_factor_)
+            .def_rw("piece", &heongpu::EvalModConfig::piece_)
+            .def_rw("sine_type", &heongpu::EvalModConfig::sine_type_)
+            .def_rw("poly_type", &heongpu::EvalModConfig::poly_type_);
+
+        nb::class_<heongpu::BootstrappingConfig>(
+            m, "BootstrappingConfig",
+            "Configuration of bootstrapping: SlotToCoeff, EvalMod and "
+            "CoeffToSlot.")
+            .def(nb::init<heongpu::EncodingMatrixConfig, heongpu::EvalModConfig,
+                          heongpu::EncodingMatrixConfig>(),
+                 "stc_config"_a, "eval_mod_config"_a, "cts_config"_a)
+            .def_rw("cts_config", &heongpu::BootstrappingConfig::cts_config_)
+            .def_rw("stc_config", &heongpu::BootstrappingConfig::stc_config_)
+            .def_rw("eval_mod_config",
+                    &heongpu::BootstrappingConfig::eval_mod_config_)
+            .def_rw("cts_piece", &heongpu::BootstrappingConfig::CtoS_piece_)
+            .def_rw("stc_piece", &heongpu::BootstrappingConfig::StoC_piece_);
+
+        nb::class_<heongpu::BootstrappingLevels>(
+            m, "BootstrappingLevels",
+            "The levels bootstrapping uses and leaves.")
+            .def(nb::init<>())
+            .def_rw("coeff_to_slot",
+                    &heongpu::BootstrappingLevels::coeff_to_slot,
+                    "Levels used by CoeffToSlot.")
+            .def_rw("eval_mod", &heongpu::BootstrappingLevels::eval_mod,
+                    "Levels used by EvalMod.")
+            .def_rw("slot_to_coeff",
+                    &heongpu::BootstrappingLevels::slot_to_coeff,
+                    "Levels used by SlotToCoeff.")
+            .def_rw("input_level", &heongpu::BootstrappingLevels::input_level,
+                    "The level the input is brought to.")
+            .def_rw("output_level", &heongpu::BootstrappingLevels::output_level,
+                    "The level of the result.")
+            .def_prop_ro("depth", &heongpu::BootstrappingLevels::depth,
+                         "The levels bootstrapping consumes.")
+            .def_prop_ro("usable_levels",
+                         &heongpu::BootstrappingLevels::usable_levels,
+                         "The levels left for computation after "
+                         "bootstrapping.")
+            .def("__repr__",
+                 [](const heongpu::BootstrappingLevels& self)
+                 {
+                     std::ostringstream stream;
+                     stream << "BootstrappingLevels(coeff_to_slot="
+                            << self.coeff_to_slot
+                            << ", eval_mod=" << self.eval_mod
+                            << ", slot_to_coeff=" << self.slot_to_coeff
+                            << ", input_level=" << self.input_level
+                            << ", output_level=" << self.output_level << ")";
+                     return stream.str();
+                 });
+
+        m.def(
+            "bootstrapping_levels",
+            [](const heongpu::BootstrappingConfig& config,
+               heongpu::arithmetic_bootstrapping_type type)
+            { return heongpu::bootstrapping_levels(config, type); },
+            "config"_a, "type"_a,
+            "Returns the levels arithmetic bootstrapping with this "
+            "configuration uses.");
+        m.def(
+            "bootstrapping_levels",
+            [](const heongpu::BootstrappingConfig& config,
+               heongpu::logic_bootstrapping_type type)
+            { return heongpu::bootstrapping_levels(config, type); },
+            "config"_a, "type"_a,
+            "Returns the levels logic bootstrapping with this configuration "
+            "uses.");
+
+        using Preset = heongpu::CKKSBootstrappingPreset;
+        nb::class_<Preset>(
+            m, "BootstrappingPreset",
+            "Complete parameters for bootstrapping: ring size, moduli, scale, "
+            "secret key Hamming weights and bootstrapping configuration. "
+            "Create one with regular(), slim(), bit() or gate(), optionally "
+            "with the number of levels left for computation.")
+            .def_static("regular", nb::overload_cast<>(&Preset::regular))
+            .def_static("regular", nb::overload_cast<int>(&Preset::regular),
+                        "usable_levels"_a)
+            .def_static("slim", nb::overload_cast<>(&Preset::slim))
+            .def_static("slim", nb::overload_cast<int>(&Preset::slim),
+                        "usable_levels"_a)
+            .def_static("bit", nb::overload_cast<>(&Preset::bit))
+            .def_static("bit", nb::overload_cast<int>(&Preset::bit),
+                        "usable_levels"_a)
+            .def_static("gate", nb::overload_cast<>(&Preset::gate))
+            .def_static("gate", nb::overload_cast<int>(&Preset::gate),
+                        "usable_levels"_a)
+            .def_rw("arithmetic_type", &Preset::arithmetic_type)
+            .def_rw("logic_type", &Preset::logic_type)
+            .def_rw("poly_modulus_degree", &Preset::poly_modulus_degree)
+            .def_rw("coeff_modulus", &Preset::coeff_modulus)
+            .def_rw("special_modulus", &Preset::special_modulus)
+            .def_rw("coeff_modulus_bit_sizes", &Preset::coeff_modulus_bit_sizes)
+            .def_rw("special_modulus_bit_sizes",
+                    &Preset::special_modulus_bit_sizes)
+            .def_rw("scale", &Preset::scale)
+            .def_rw("secret_key_hamming_weight",
+                    &Preset::secret_key_hamming_weight)
+            .def_rw("sparse_secret_key_hamming_weight",
+                    &Preset::sparse_secret_key_hamming_weight)
+            .def_rw("config", &Preset::config)
+            .def("apply", &Preset::apply, "context"_a,
+                 "Sets the ring size and the moduli on an ungenerated "
+                 "context.")
+            .def("levels", &Preset::levels,
+                 "Returns the levels bootstrapping uses and leaves.");
+
+        // --------------------------------------------------------------
         // Keys
         // --------------------------------------------------------------
 
