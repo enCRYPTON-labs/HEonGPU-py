@@ -513,6 +513,11 @@ namespace heongpu_py
                 { return to_bytes_object(save_to_string(self)); },
                 "Serializes the ciphertext to bytes in the HEonGPU format; "
                 "Session.ciphertext_from_bytes() reads it.")
+            .def_prop_ro(
+                "is_empty",
+                [](const SessionCiphertext& self) { return self.level() < 0; },
+                "Whether the ciphertext is empty (created with "
+                "SessionCiphertext()).")
             .def("__reduce_ex__",
                  [](const SessionCiphertext&, nb::handle) -> nb::object
                  {
@@ -951,7 +956,7 @@ namespace heongpu_py
                     nb::gil_scoped_release release;
                     return self.on_stream(s);
                 },
-                "stream"_a, nb::keep_alive<0, 2>(),
+                nb::arg("stream").none(), nb::keep_alive<0, 2>(),
                 "Returns a view of the session that runs on a CUDA stream "
                 "(a heongpu.Stream, any stream object or an int handle): it "
                 "shares the keys and the state, and its ciphertexts and the "
@@ -1018,6 +1023,10 @@ namespace heongpu_py
                  "Returns the ArithmeticOperator of the session (a "
                  "reference), for example to rescale in the manual rescale "
                  "mode.")
+            .def(
+                "__copy__", [](const Session& self) { return Session(self); },
+                "Returns a session sharing the state (keys and context) of "
+                "this one.")
             .def("__reduce_ex__",
                  [](const Session&, nb::handle) -> nb::object
                  {

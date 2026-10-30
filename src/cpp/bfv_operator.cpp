@@ -53,7 +53,8 @@ namespace heongpu_py
                self.NAME##_inplace(output, b, relin_key, opts);                \
                return output;                                                  \
            },                                                                  \
-           "a"_a, "b"_a, "relin_key"_a, "options"_a = nb::none(), DOC)         \
+           "input1"_a, "input2"_a, "relin_key"_a, "options"_a = nb::none(),    \
+           DOC)                                                                \
         .def(                                                                  \
             #NAME,                                                             \
             [](LogicOperator& self, const Ciphertext& a, const Plaintext& b,   \
@@ -65,7 +66,7 @@ namespace heongpu_py
                 self.NAME##_inplace(output, b, opts);                          \
                 return output;                                                 \
             },                                                                 \
-            "a"_a, "b"_a, "options"_a = nb::none())                            \
+            "input1"_a, "input2"_a, "options"_a = nb::none())                  \
         .def(                                                                  \
             #NAME "_inplace",                                                  \
             [](LogicOperator& self, Ciphertext& a, const Ciphertext& b,        \
@@ -75,8 +76,8 @@ namespace heongpu_py
                 nb::gil_scoped_release release;                                \
                 self.NAME##_inplace(a, b, relin_key, opts);                    \
             },                                                                 \
-            "a"_a, "b"_a, "relin_key"_a, "options"_a = nb::none(),             \
-            "In-place variant: the result replaces a.")                        \
+            "input1"_a, "input2"_a, "relin_key"_a, "options"_a = nb::none(),   \
+            "In-place variant: the result replaces input1.")                   \
         .def(                                                                  \
             #NAME "_inplace",                                                  \
             [](LogicOperator& self, Ciphertext& a, const Plaintext& b,         \
@@ -86,7 +87,7 @@ namespace heongpu_py
                 nb::gil_scoped_release release;                                \
                 self.NAME##_inplace(a, b, opts);                               \
             },                                                                 \
-            "a"_a, "b"_a, "options"_a = nb::none())
+            "input1"_a, "input2"_a, "options"_a = nb::none())
     } // namespace
 
     void bind_bfv_operator(nb::module_& m)
@@ -115,7 +116,8 @@ namespace heongpu_py
                     nb::gil_scoped_release release;
                     return self.add(a, b, opts);
                 },
-                "a"_a, "b"_a, "options"_a = nb::none(), "Returns a + b.")
+                "input1"_a, "input2"_a, "options"_a = nb::none(),
+                "Returns a + b.")
             .def(
                 "add_inplace",
                 [](ArithmeticOperator& self, Ciphertext& a, const Ciphertext& b,
@@ -125,7 +127,7 @@ namespace heongpu_py
                     nb::gil_scoped_release release;
                     self.add_inplace(a, b, opts);
                 },
-                "a"_a, "b"_a, "options"_a = nb::none(), "a += b.")
+                "input1"_a, "input2"_a, "options"_a = nb::none(), "a += b.")
             .def(
                 "sub",
                 [](ArithmeticOperator& self, const Ciphertext& a,
@@ -135,7 +137,8 @@ namespace heongpu_py
                     nb::gil_scoped_release release;
                     return self.sub(a, b, opts);
                 },
-                "a"_a, "b"_a, "options"_a = nb::none(), "Returns a - b.")
+                "input1"_a, "input2"_a, "options"_a = nb::none(),
+                "Returns a - b.")
             .def(
                 "sub_inplace",
                 [](ArithmeticOperator& self, Ciphertext& a, const Ciphertext& b,
@@ -145,7 +148,7 @@ namespace heongpu_py
                     nb::gil_scoped_release release;
                     self.sub_inplace(a, b, opts);
                 },
-                "a"_a, "b"_a, "options"_a = nb::none(), "a -= b.")
+                "input1"_a, "input2"_a, "options"_a = nb::none(), "a -= b.")
             .def(
                 "negate",
                 [](ArithmeticOperator& self, const Ciphertext& a,
@@ -155,7 +158,7 @@ namespace heongpu_py
                     nb::gil_scoped_release release;
                     return self.negate(a, opts);
                 },
-                "a"_a, "options"_a = nb::none(), "Returns -a.")
+                "input"_a, "options"_a = nb::none(), "Returns -a.")
             .def(
                 "negate_inplace",
                 [](ArithmeticOperator& self, Ciphertext& a, nb::handle options)
@@ -164,7 +167,7 @@ namespace heongpu_py
                     nb::gil_scoped_release release;
                     self.negate_inplace(a, opts);
                 },
-                "a"_a, "options"_a = nb::none(), "a = -a.")
+                "input"_a, "options"_a = nb::none(), "a = -a.")
             .def(
                 "add_plain",
                 [](ArithmeticOperator& self, const Ciphertext& a,
@@ -174,7 +177,7 @@ namespace heongpu_py
                     nb::gil_scoped_release release;
                     return self.add_plain(a, b, opts);
                 },
-                "a"_a, "b"_a, "options"_a = nb::none(),
+                "input1"_a, "input2"_a, "options"_a = nb::none(),
                 "Returns a + b for a plaintext b.")
             .def(
                 "add_plain_inplace",
@@ -185,7 +188,7 @@ namespace heongpu_py
                     nb::gil_scoped_release release;
                     self.add_plain_inplace(a, b, opts);
                 },
-                "a"_a, "b"_a, "options"_a = nb::none(),
+                "input1"_a, "input2"_a, "options"_a = nb::none(),
                 "a += b for a plaintext b.")
             .def(
                 "sub_plain",
@@ -196,7 +199,7 @@ namespace heongpu_py
                     nb::gil_scoped_release release;
                     return self.sub_plain(a, b, opts);
                 },
-                "a"_a, "b"_a, "options"_a = nb::none(),
+                "input1"_a, "input2"_a, "options"_a = nb::none(),
                 "Returns a - b for a plaintext b.")
             .def(
                 "sub_plain_inplace",
@@ -207,7 +210,7 @@ namespace heongpu_py
                     nb::gil_scoped_release release;
                     self.sub_plain_inplace(a, b, opts);
                 },
-                "a"_a, "b"_a, "options"_a = nb::none(),
+                "input1"_a, "input2"_a, "options"_a = nb::none(),
                 "a -= b for a plaintext b.");
 
         // Multiplication and relinearization.
@@ -221,7 +224,7 @@ namespace heongpu_py
                     nb::gil_scoped_release release;
                     return self.multiply(a, b, opts);
                 },
-                "a"_a, "b"_a, "options"_a = nb::none(),
+                "input1"_a, "input2"_a, "options"_a = nb::none(),
                 "Returns a * b, a ciphertext of size 3 that needs "
                 "relinearize() before decryption, the next multiplication or "
                 "a rotation.")
@@ -234,7 +237,7 @@ namespace heongpu_py
                     nb::gil_scoped_release release;
                     self.multiply_inplace(a, b, opts);
                 },
-                "a"_a, "b"_a, "options"_a = nb::none(), "a *= b.")
+                "input1"_a, "input2"_a, "options"_a = nb::none(), "a *= b.")
             .def(
                 "multiply_plain",
                 [](ArithmeticOperator& self, const Ciphertext& a,
@@ -244,7 +247,7 @@ namespace heongpu_py
                     nb::gil_scoped_release release;
                     return self.multiply_plain(a, b, opts);
                 },
-                "a"_a, "b"_a, "options"_a = nb::none(),
+                "input1"_a, "input2"_a, "options"_a = nb::none(),
                 "Returns a * b for a plaintext b.")
             .def(
                 "multiply_plain_inplace",
@@ -255,7 +258,7 @@ namespace heongpu_py
                     nb::gil_scoped_release release;
                     self.multiply_plain_inplace(a, b, opts);
                 },
-                "a"_a, "b"_a, "options"_a = nb::none(),
+                "input1"_a, "input2"_a, "options"_a = nb::none(),
                 "a *= b for a plaintext b.")
             .def(
                 "relinearize",
@@ -268,7 +271,7 @@ namespace heongpu_py
                     self.relinearize_inplace(output, relin_key, opts);
                     return output;
                 },
-                "a"_a, "relin_key"_a, "options"_a = nb::none(),
+                "input"_a, "relin_key"_a, "options"_a = nb::none(),
                 "Returns a relinearized copy of a ciphertext of size 3.")
             .def(
                 "relinearize_inplace",
@@ -279,7 +282,7 @@ namespace heongpu_py
                     nb::gil_scoped_release release;
                     self.relinearize_inplace(a, relin_key, opts);
                 },
-                "a"_a, "relin_key"_a, "options"_a = nb::none(),
+                "input"_a, "relin_key"_a, "options"_a = nb::none(),
                 "Brings a ciphertext of size 3 back to size 2.");
 
         // Rotations and key switching.
@@ -293,7 +296,7 @@ namespace heongpu_py
                     nb::gil_scoped_release release;
                     return self.rotate_rows(a, galois_key, shift, opts);
                 },
-                "a"_a, "galois_key"_a, "shift"_a, "options"_a = nb::none(),
+                "input"_a, "galois_key"_a, "shift"_a, "options"_a = nb::none(),
                 "Rotates both rows of N/2 slots by shift to the left (to the "
                 "right for a negative shift): slot i gets slot i + shift. "
                 "Shifts without a key of their own are composed of the "
@@ -307,7 +310,7 @@ namespace heongpu_py
                     nb::gil_scoped_release release;
                     self.rotate_rows_inplace(a, galois_key, shift, opts);
                 },
-                "a"_a, "galois_key"_a, "shift"_a, "options"_a = nb::none())
+                "input"_a, "galois_key"_a, "shift"_a, "options"_a = nb::none())
             .def(
                 "rotate_rows_hoisted",
                 [](ArithmeticOperator& self, const Ciphertext& a,
@@ -319,7 +322,7 @@ namespace heongpu_py
                     nb::gil_scoped_release release;
                     return self.rotate_rows_hoisted(a, galois_key, steps, opts);
                 },
-                "a"_a, "galois_key"_a, "shifts"_a, "options"_a = nb::none(),
+                "input"_a, "galois_key"_a, "shifts"_a, "options"_a = nb::none(),
                 "Returns the row rotations of a by each shift, as a list. The "
                 "decomposition of a is computed once and shared by the "
                 "shifts that have a key of their own.")
@@ -332,7 +335,7 @@ namespace heongpu_py
                     nb::gil_scoped_release release;
                     return self.rotate_columns(a, galois_key, opts);
                 },
-                "a"_a, "galois_key"_a, "options"_a = nb::none(),
+                "input"_a, "galois_key"_a, "options"_a = nb::none(),
                 "Swaps the two rows.")
             .def(
                 "apply_galois",
@@ -348,7 +351,7 @@ namespace heongpu_py
                                       opts);
                     return output;
                 },
-                "a"_a, "galois_key"_a, "galois_element"_a,
+                "input"_a, "galois_key"_a, "galois_element"_a,
                 "options"_a = nb::none(),
                 "Applies the automorphism X -> X^galois_element; the key must "
                 "hold that Galois element.")
@@ -363,7 +366,7 @@ namespace heongpu_py
                     self.apply_galois_inplace(a, galois_key, galois_element,
                                               opts);
                 },
-                "a"_a, "galois_key"_a, "galois_element"_a,
+                "input"_a, "galois_key"_a, "galois_element"_a,
                 "options"_a = nb::none())
             .def(
                 "keyswitch",
@@ -377,7 +380,7 @@ namespace heongpu_py
                     self.keyswitch(a, output, switch_key, opts);
                     return output;
                 },
-                "a"_a, "switch_key"_a, "options"_a = nb::none(),
+                "input"_a, "switch_key"_a, "options"_a = nb::none(),
                 "Returns a under the new secret key of the switch key.")
             .def(
                 "multiply_power_of_X",
@@ -395,7 +398,7 @@ namespace heongpu_py
                     self.multiply_power_of_X(a, output, index, opts);
                     return output;
                 },
-                "a"_a, "index"_a, "options"_a = nb::none(),
+                "input"_a, "index"_a, "options"_a = nb::none(),
                 "Multiplies the plaintext polynomial by X^index (a "
                 "negacyclic shift of its coefficients).");
 
@@ -410,7 +413,7 @@ namespace heongpu_py
                     nb::gil_scoped_release release;
                     return self.sum_slots(a, galois_key, opts);
                 },
-                "a"_a, "galois_key"_a, "options"_a = nb::none(),
+                "input"_a, "galois_key"_a, "options"_a = nb::none(),
                 "Returns the sum of all slots in every slot. Needs the row "
                 "rotations by the powers of two up to N/4, for example "
                 "GaloisKey(context, max_shift=log2(N) - 2).")
@@ -425,7 +428,7 @@ namespace heongpu_py
                     return self.inner_product(a, b, relin_key, galois_key,
                                               opts);
                 },
-                "a"_a, "b"_a, "relin_key"_a, "galois_key"_a,
+                "input1"_a, "input2"_a, "relin_key"_a, "galois_key"_a,
                 "options"_a = nb::none(),
                 "Returns the inner product of the slots of a and b in every "
                 "slot (multiply, relinearize, sum_slots).")
@@ -439,7 +442,8 @@ namespace heongpu_py
                     nb::gil_scoped_release release;
                     return self.inner_product(a, b, galois_key, opts);
                 },
-                "a"_a, "b"_a, "galois_key"_a, "options"_a = nb::none(),
+                "input1"_a, "input2"_a, "galois_key"_a,
+                "options"_a = nb::none(),
                 "Returns the inner product of the slots of a and of a "
                 "plaintext b in every slot.");
 
@@ -457,7 +461,7 @@ namespace heongpu_py
                     self.transform_to_ntt(a, output, opts);
                     return output;
                 },
-                "a"_a, "options"_a = nb::none(),
+                "input"_a, "options"_a = nb::none(),
                 "Returns the plaintext lifted to the ciphertext moduli in the "
                 "NTT domain, which makes repeated multiply_plain() with it "
                 "faster on ciphertexts in the NTT domain.")
@@ -473,7 +477,7 @@ namespace heongpu_py
                     self.transform_to_ntt(a, output, opts);
                     return output;
                 },
-                "a"_a, "options"_a = nb::none(),
+                "input"_a, "options"_a = nb::none(),
                 "Returns the ciphertext in the NTT domain.")
             .def(
                 "transform_to_ntt_inplace",
@@ -483,7 +487,7 @@ namespace heongpu_py
                     nb::gil_scoped_release release;
                     self.transform_to_ntt_inplace(a, opts);
                 },
-                "a"_a, "options"_a = nb::none())
+                "input"_a, "options"_a = nb::none())
             .def(
                 "transform_to_ntt_inplace",
                 [](ArithmeticOperator& self, Ciphertext& a, nb::handle options)
@@ -492,7 +496,7 @@ namespace heongpu_py
                     nb::gil_scoped_release release;
                     self.transform_to_ntt_inplace(a, opts);
                 },
-                "a"_a, "options"_a = nb::none())
+                "input"_a, "options"_a = nb::none())
             .def(
                 "transform_from_ntt",
                 [](ArithmeticOperator& self, const Ciphertext& a,
@@ -505,7 +509,7 @@ namespace heongpu_py
                     self.transform_from_ntt(a, output, opts);
                     return output;
                 },
-                "a"_a, "options"_a = nb::none(),
+                "input"_a, "options"_a = nb::none(),
                 "Returns the ciphertext back in the coefficient domain.")
             .def(
                 "transform_from_ntt_inplace",
@@ -515,7 +519,7 @@ namespace heongpu_py
                     nb::gil_scoped_release release;
                     self.transform_from_ntt_inplace(a, opts);
                 },
-                "a"_a, "options"_a = nb::none());
+                "input"_a, "options"_a = nb::none());
 
         // --------------------------------------------------------------
         // Logic operator
@@ -537,7 +541,7 @@ namespace heongpu_py
                     self.NOT_inplace(output, opts);
                     return output;
                 },
-                "a"_a, "options"_a = nb::none(), "Returns 1 - a.")
+                "input"_a, "options"_a = nb::none(), "Returns 1 - a.")
             .def(
                 "NOT_inplace",
                 [](LogicOperator& self, Ciphertext& a, nb::handle options)
@@ -546,7 +550,7 @@ namespace heongpu_py
                     nb::gil_scoped_release release;
                     self.NOT_inplace(a, opts);
                 },
-                "a"_a, "options"_a = nb::none(), "a = 1 - a.");
+                "input"_a, "options"_a = nb::none(), "a = 1 - a.");
 
         HEONGPU_PY_BFV_GATE(logic, AND, "Returns a AND b (a * b).");
         HEONGPU_PY_BFV_GATE(logic, OR, "Returns a OR b (a + b - a * b).");

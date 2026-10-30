@@ -114,14 +114,12 @@ namespace heongpu_py
             {
                 shape = {data.size()};
             }
-            auto* owner_data = new std::vector<std::uint64_t>(
-                data.begin(), data.end());
+            auto* owner_data =
+                new std::vector<std::uint64_t>(data.begin(), data.end());
             data.clear();
-            nb::capsule owner(owner_data, [](void* pointer) noexcept
-                              {
-                                  delete static_cast<
-                                      std::vector<std::uint64_t>*>(pointer);
-                              });
+            nb::capsule owner(
+                owner_data, [](void* pointer) noexcept
+                { delete static_cast<std::vector<std::uint64_t>*>(pointer); });
             return nb::ndarray<nb::numpy, std::uint64_t>(
                 owner_data->data(), shape.size(), shape.data(), owner);
         }
@@ -197,8 +195,7 @@ namespace heongpu_py
                          "The level of fresh ciphertexts in the automatic "
                          "rescale mode.")
             .def_prop_ro("poly_modulus_degree",
-                         &Context::get_poly_modulus_degree,
-                         "The ring size N.")
+                         &Context::get_poly_modulus_degree, "The ring size N.")
             .def_prop_ro("log_poly_modulus_degree",
                          &Context::get_log_poly_modulus_degree)
             .def_prop_ro("security_level", &Context::get_security_level)
@@ -209,7 +206,8 @@ namespace heongpu_py
                          "The number of ciphertext and special primes (Q and "
                          "P).")
             .def_prop_ro(
-                "key_modulus", [](const Context& self)
+                "key_modulus",
+                [](const Context& self)
                 { return modulus_values(self.get_key_modulus()); },
                 "The ciphertext primes followed by the special primes.")
             .def_prop_ro("slot_count", [](const Context& self)
@@ -217,8 +215,7 @@ namespace heongpu_py
             .def_prop_ro("context_id", &Context::context_id,
                          "Identity of the parameters; objects can only be "
                          "used with a context of the same identity.")
-            .def("print_parameters",
-                 [](const Context& self)
+            .def("print_parameters", [](const Context& self)
                  { nb::print(nb::str(self.to_string().c_str())); })
             .def("__str__", &Context::to_string)
             .def("__repr__",
@@ -231,8 +228,7 @@ namespace heongpu_py
                             << " P="
                             << self.get_key_modulus_count() -
                                    self.get_ciphertext_modulus_count()
-                            << " id=0x" << std::hex << self.context_id()
-                            << ">";
+                            << " id=0x" << std::hex << self.context_id() << ">";
                      return stream.str();
                  })
             .def(
@@ -255,8 +251,10 @@ namespace heongpu_py
                 "Deserializes a context and generates it (the tables are "
                 "computed again).")
             .def(
-                "save", [](const Context& self, nb::handle file)
-                { write_file(file, save_to_string(self)); }, "file"_a,
+                "save",
+                [](const Context& self, nb::handle file)
+                { write_file(file, save_to_string(self)); },
+                "file"_a,
                 "Writes the parameters to a path or to a binary file object.")
             .def_static(
                 "load",
@@ -267,7 +265,19 @@ namespace heongpu_py
                     return object;
                 },
                 "file"_a,
-                "Reads a context from a path or from a binary file object.");
+                "Reads a context from a path or from a binary file object.")
+            .def("__getstate__",
+                 [](const Context& self)
+                 {
+                     std::string data = save_to_string(self);
+                     return nb::bytes(data.data(), data.size());
+                 })
+            .def("__setstate__",
+                 [](Context& self, nb::bytes data)
+                 {
+                     new (&self) Context();
+                     load_from_string(self, bytes_to_string(data));
+                 });
 
         // --------------------------------------------------------------
         // Parameters
@@ -355,8 +365,7 @@ namespace heongpu_py
             .def_rw("special_modulus_count", &Params::special_modulus_count,
                     "The number of special primes; 0 chooses it.")
             .def_rw("rescale_mode", &Params::rescale_mode, nb::arg().none())
-            .def_rw("coeff_modulus_bit_sizes",
-                    &Params::coeff_modulus_bit_sizes)
+            .def_rw("coeff_modulus_bit_sizes", &Params::coeff_modulus_bit_sizes)
             .def_rw("special_modulus_bit_sizes",
                     &Params::special_modulus_bit_sizes)
             .def_rw("coeff_modulus", &Params::coeff_modulus)
@@ -557,8 +566,7 @@ namespace heongpu_py
                 "coefficients"_a, "context"_a, "stream"_a = nb::none(),
                 "A secret key with the given ternary coefficients.")
             .def_prop_ro("ring_size", &SecretKey::ring_size)
-            .def_prop_ro("coeff_modulus_count",
-                         &SecretKey::coeff_modulus_count)
+            .def_prop_ro("coeff_modulus_count", &SecretKey::coeff_modulus_count)
             .def("set_context", &SecretKey::set_context, "context"_a,
                  "Attaches a context to a loaded key.");
         def_storage<SecretKey>(secret_key);
@@ -570,6 +578,8 @@ namespace heongpu_py
             .def_prop_ro("ring_size", &PublicKey::ring_size)
             .def_prop_ro("coeff_modulus_count",
                          &PublicKey::coeff_modulus_count);
+        public_key.def("set_context", &PublicKey::set_context, "context"_a,
+                       "Attaches a context to a loaded key.");
         def_storage<PublicKey>(public_key);
         def_serialization<PublicKey>(public_key);
         def_copy<PublicKey>(public_key);
@@ -577,6 +587,8 @@ namespace heongpu_py
         nb::class_<RelinKey> relin_key(m, "RelinKey",
                                        "The relinearization key.");
         relin_key.def(nb::init<ContextPtr>(), "context"_a);
+        relin_key.def("set_context", &RelinKey::set_context, "context"_a,
+                      "Attaches a context to a loaded key.");
         def_storage<RelinKey>(relin_key);
         def_serialization<RelinKey>(relin_key);
         def_copy<RelinKey>(relin_key);
@@ -632,6 +644,8 @@ namespace heongpu_py
             m, "SwitchKey",
             "A key switching key from one secret key to another.");
         switch_key.def(nb::init<ContextPtr>(), "context"_a);
+        switch_key.def("set_context", &SwitchKey::set_context, "context"_a,
+                       "Attaches a context to a loaded key.");
         def_storage<SwitchKey>(switch_key);
         def_serialization<SwitchKey>(switch_key);
         def_copy<SwitchKey>(switch_key);
@@ -660,8 +674,10 @@ namespace heongpu_py
         plaintext.def(nb::init<>())
             .def(
                 "__init__",
-                [](Plaintext* self, ContextPtr context, nb::handle options)
-                { new (self) Plaintext(std::move(context), to_options(options)); },
+                [](Plaintext* self, ContextPtr context, nb::handle options) {
+                    new (self)
+                        Plaintext(std::move(context), to_options(options));
+                },
                 "context"_a, "options"_a = nb::none())
             .def_prop_ro("size", &Plaintext::size)
             .def_prop_ro("depth", &Plaintext::depth,
@@ -677,13 +693,15 @@ namespace heongpu_py
                     std::vector<Data64> data(self.size());
                     {
                         nb::gil_scoped_release release;
+                        // Wait for the work on the stream of the object.
+                        HEONGPU_PY_CUDA_CHECK(cudaDeviceSynchronize());
                         bool on_device = self.is_on_device();
                         if (on_device)
                         {
-                            HEONGPU_PY_CUDA_CHECK(cudaMemcpyAsync(
-                                data.data(), self.data(),
-                                data.size() * sizeof(Data64),
-                                cudaMemcpyDeviceToHost, s));
+                            HEONGPU_PY_CUDA_CHECK(
+                                cudaMemcpyAsync(data.data(), self.data(),
+                                                data.size() * sizeof(Data64),
+                                                cudaMemcpyDeviceToHost, s));
                             HEONGPU_PY_CUDA_CHECK(cudaStreamSynchronize(s));
                         }
                         else
@@ -706,8 +724,7 @@ namespace heongpu_py
         ciphertext.def(nb::init<>())
             .def(
                 "__init__",
-                [](Ciphertext* self, ContextPtr context, nb::handle options)
-                {
+                [](Ciphertext* self, ContextPtr context, nb::handle options) {
                     new (self)
                         Ciphertext(std::move(context), to_options(options));
                 },
@@ -729,7 +746,8 @@ namespace heongpu_py
             .def_prop_ro("relinearization_required",
                          &Ciphertext::relinearization_required)
             .def_prop_ro(
-                "stream", [](const Ciphertext& self)
+                "stream",
+                [](const Ciphertext& self)
                 { return from_stream(self.stream()); },
                 "Handle of the CUDA stream of the data.")
             .def(
@@ -747,6 +765,8 @@ namespace heongpu_py
                     std::vector<Data64> data;
                     {
                         nb::gil_scoped_release release;
+                        // Wait for the work on the stream of the object.
+                        HEONGPU_PY_CUDA_CHECK(cudaDeviceSynchronize());
                         self.get_data(data, s);
                         HEONGPU_PY_CUDA_CHECK(cudaStreamSynchronize(s));
                     }
@@ -773,8 +793,8 @@ namespace heongpu_py
                             "and decodes them.")
             .def(nb::init<ContextPtr>(), "context"_a)
             .def_prop_ro("slot_count", &Encoder::slot_count)
-            .def("encode", &encode_values, "values"_a,
-                 "scale"_a = nb::none(), nb::kw_only(), "depth"_a = nb::none(),
+            .def("encode", &encode_values, "values"_a, "scale"_a = nb::none(),
+                 nb::kw_only(), "depth"_a = nb::none(),
                  "encoding"_a = heongpu::encoding::slot,
                  "options"_a = nb::none(),
                  "Encodes a scalar (into every slot), a sequence or an array "

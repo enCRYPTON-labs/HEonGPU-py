@@ -286,3 +286,23 @@ def test_stream_execution(ckks_setup, rng):
         )
         stream.synchronize()
     np.testing.assert_allclose(result[:8], values, atol=TOLERANCE)
+
+
+def test_context_pickle(ckks_setup):
+    loaded = pickle.loads(pickle.dumps(ckks_setup.context))
+    assert loaded.context_id == ckks_setup.context.context_id
+
+
+def test_raw_data_waits_for_the_stream(ckks_setup, rng):
+    keygen = ckks_setup.keygen
+    galois_key = keygen.galois_key(ckks_setup.secret_key, [1])
+    operator = ckks.ArithmeticOperator(ckks_setup.context, ckks_setup.encoder)
+    cipher = ckks_setup.encrypt(rng.uniform(-1, 1, 8))
+    hg.synchronize()
+    stream = hg.Stream()
+    options = hg.ExecutionOptions(stream=stream)
+    for _ in range(50):
+        operator.rotate_inplace(cipher, galois_key, 1, options=options)
+    data = cipher.get_data()
+    stream.synchronize()
+    np.testing.assert_array_equal(data, cipher.get_data())

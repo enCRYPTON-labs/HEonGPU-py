@@ -831,3 +831,16 @@ def test_gate_bootstrapping():
     z = other.encrypt(np.zeros(other.slot_count))
     with pytest.raises(hg.ContextMismatchError):
         session.AND_bootstrapping(x, z)
+
+
+def test_session_consistency_helpers():
+    session = ckks.Session(ckks.Params(multiplicative_depth=2))
+    assert copy.copy(session).slot_count == session.slot_count
+    assert session.on_stream(None).stream == 0
+    assert ckks.SessionCiphertext().is_empty
+    assert not session.encrypt([1.0]).is_empty
+
+
+def test_precision_stats_rejects_empty_values():
+    with pytest.raises(ValueError):
+        ckks.get_precision_stats([], [])

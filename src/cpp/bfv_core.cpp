@@ -617,6 +617,8 @@ namespace heongpu_py
                     std::vector<Data64> data(self.size());
                     {
                         nb::gil_scoped_release release;
+                        // Wait for the work on the stream of the object.
+                        HEONGPU_PY_CUDA_CHECK(cudaDeviceSynchronize());
                         if (self.is_on_device())
                         {
                             HEONGPU_PY_CUDA_CHECK(
@@ -684,6 +686,8 @@ namespace heongpu_py
                     std::vector<Data64> data;
                     {
                         nb::gil_scoped_release release;
+                        // Wait for the work on the stream of the object.
+                        HEONGPU_PY_CUDA_CHECK(cudaDeviceSynchronize());
                         self.get_data(data, s);
                         HEONGPU_PY_CUDA_CHECK(cudaStreamSynchronize(s));
                     }
