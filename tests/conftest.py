@@ -21,12 +21,6 @@ def pytest_collection_modifyitems(config, items):
             item.add_marker(skip)
 
 
-def pytest_configure(config):
-    config.addinivalue_line(
-        "markers", "nogpu: the test does not need a CUDA device"
-    )
-
-
 @pytest.fixture(scope="session", autouse=True)
 def memory_pool():
     """Starts with a small device pool, so that several test processes can

@@ -61,9 +61,10 @@ HEONGPU_PY_HEONGPU_PROVIDER = { env = "HEONGPU_PY_HEONGPU_PROVIDER", default = "
 [tool.pytest.ini_options]
 minversion = "7.0"
 testpaths = ["tests"]
-addopts = ["-ra", "--strict-markers"]
+addopts = ["-ra", "--strict-markers", "-m", "not slow"]
 markers = [
-    "slow: long running tests, for example bootstrapping (deselect with '-m \"not slow\"')",
+    "slow: long running tests, for example bootstrapping; deselected by default, run them with '-m slow'",
+    "nogpu: the test does not need a CUDA device",
 ]
 
 [tool.black]
