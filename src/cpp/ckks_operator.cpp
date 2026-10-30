@@ -1398,6 +1398,10 @@ namespace heongpu_py
                 "get_precision_stats",
                 [](nb::handle values_want, nb::handle values_test)
                 {
+                    if (nb::len(values_want) == 0)
+                    {
+                        throw nb::value_error("values_want must not be empty.");
+                    }
                     if (is_complex(values_want))
                     {
                         std::vector<Complex64> want =
@@ -1424,7 +1428,8 @@ namespace heongpu_py
                 "values_want"_a, "values_test"_a,
                 "Compares values_test (for example decrypted values) with the "
                 "expected values_want, real or complex array-likes of the "
-                "same length. Raises ValueError for different lengths.");
+                "same length. Raises ValueError for different lengths or empty "
+                "values.");
 
             m.def(
                 "chebyshev_coefficients",
