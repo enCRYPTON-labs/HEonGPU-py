@@ -52,7 +52,24 @@ print(session.decrypt(z)[:4])
 - **The GIL is released** during GPU work, so other Python threads keep
   running.
 
-## Requirements
+## Installation
+
+```bash
+pip install heongpu
+```
+
+The wheels on PyPI are for Linux x86_64 (glibc 2.28 or newer) and Python
+3.10 or newer. They are built with CUDA 13.0 and contain the CUDA runtime
+and the other libraries the module needs, so the only requirement is an
+NVIDIA driver of version 580 or newer. They contain the code of the GPU
+architectures 7.5 (Turing), 8.0 (Ampere and Ada: it also runs on 8.6 and
+8.9), 9.0 (Hopper), 10.0 and 12.0 (Blackwell), and PTX that the driver
+compiles for newer GPUs. On other systems pip builds the package from the
+source distribution, which needs what a build from source needs.
+
+### Building from source
+
+Requirements:
 
 - Linux with an NVIDIA GPU and driver
 - CUDA Toolkit 12.8 or newer
@@ -61,12 +78,13 @@ print(session.decrypt(z)[:4])
 - The libraries HEonGPU needs: GMP, NTL, OpenSSL and zlib (for example
   `apt install libgmp-dev libntl-dev libssl-dev zlib1g-dev`)
 
-## Installation
-
 ```bash
 git clone https://github.com/enCRYPTON-labs/HEonGPU-py.git
 cd HEonGPU-py
 pip install .
+
+# Or build the source distribution of PyPI instead of using a wheel.
+pip install --no-binary heongpu heongpu
 ```
 
 By default the build uses an installed HEonGPU 2.1 if CMake finds one, and

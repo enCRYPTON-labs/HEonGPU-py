@@ -20,3 +20,7 @@ The first release of the Python bindings, for HEonGPU 2.1.
 - The memory pool configuration, HEonGPU errors as Python exceptions, type
   stubs, and released GIL during GPU work.
 - The build uses an installed HEonGPU or builds HEonGPU from source.
+- Wheels on PyPI for Linux x86_64 and Python 3.10 or newer (one stable ABI
+  wheel for Python 3.12 and newer), built with CUDA 13.0 for the GPU
+  architectures 7.5 to 12.0. They need only an NVIDIA driver of version 580
+  or newer.

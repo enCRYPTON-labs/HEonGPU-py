@@ -57,6 +57,34 @@ Python package is in `src/heongpu`.
   code with `black`.
 - Write clear commit messages that explain what the change does and why.
 
+## Releases
+
+The wheels are built by [cibuildwheel](https://cibuildwheel.pypa.io) in a
+`manylinux_2_28` container: `ci/manylinux_before_all.sh` installs CUDA 13.0
+and the libraries of HEonGPU and builds HEonGPU once, and the settings are in
+`[tool.cibuildwheel]` of `pyproject.toml`. To build them locally (with
+Docker):
+
+```bash
+python -m pip install cibuildwheel
+cibuildwheel --platform linux
+```
+
+The machines that build the wheels have no GPU, so test the wheels on one
+before a release: install a wheel of `wheelhouse/` in a new virtual
+environment and run the tests and the examples.
+
+To release a version:
+
+1. Set the version in `pyproject.toml` and update `CHANGELOG.md`.
+2. Run the `Release` workflow by hand; it publishes the source distribution
+   and the wheels to TestPyPI. Install them from there and test them.
+3. Push a tag `v<version>` (for example `v0.1.0`); the workflow publishes the
+   same files to PyPI.
+
+PyPI does not accept a file again under a version it already has, so a
+broken release needs a new version.
+
 ## License
 
 By contributing, you agree that your contributions are licensed under the

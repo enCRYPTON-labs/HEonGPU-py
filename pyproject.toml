@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "Python bindings of HEonGPU, a GPU library for fully homomorphic encryption (BFV, CKKS and TFHE)"
 readme = "README.md"
 license = "Apache-2.0"
-license-files = ["LICENSE"]
+license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md"]
 authors = [{ name = "Alişah Özcan", email = "alisahozcan97@gmail.com" }]
 maintainers = [{ name = "enCRYPTON-Labs" }]
 requires-python = ">=3.10"
@@ -59,6 +59,33 @@ sdist.exclude = ["build", ".github"]
 
 [tool.scikit-build.cmake.define]
 HEONGPU_PY_HEONGPU_PROVIDER = { env = "HEONGPU_PY_HEONGPU_PROVIDER", default = "AUTO" }
+
+# The wheels on PyPI: CUDA 13.0, manylinux_2_28 x86_64, with HEonGPU built
+# once by ci/manylinux_before_all.sh. The libraries the module needs are
+# copied into the wheel, except the driver (libcuda).
+[tool.cibuildwheel]
+build = ["cp310-*", "cp311-*", "cp312-*"]
+skip = ["*-musllinux_*"]
+archs = ["x86_64"]
+manylinux-x86_64-image = "manylinux_2_28"
+build-verbosity = 1
+before-all = "bash ci/manylinux_before_all.sh"
+# The build machines have no GPU: only the tests that need none.
+test-requires = ["pytest"]
+test-sources = ["tests", "pyproject.toml"]
+test-command = "pytest -m nogpu -p no:cacheprovider"
+# One line: cibuildwheel separates the variables by spaces, not newlines.
+environment = """\
+HEONGPU_PY_CUDA_VERSION=13.0 \
+HEONGPU_PY_CUDA_ARCHITECTURES="75-real;80-real;90-real;100-real;120" \
+HEONGPU_PY_HEONGPU_TAG=v2.1.0 \
+PATH=/usr/local/cuda-13.0/bin:$PATH \
+CUDACXX=/usr/local/cuda-13.0/bin/nvcc \
+HEONGPU_PY_HEONGPU_PROVIDER=SYSTEM \
+CMAKE_PREFIX_PATH=/opt/heongpu \
+CMAKE_ARGS="-DCMAKE_CUDA_ARCHITECTURES=$HEONGPU_PY_CUDA_ARCHITECTURES"\
+"""
+repair-wheel-command = "auditwheel repair --exclude libcuda.so.1 -w {dest_dir} {wheel}"
 
 [tool.pytest.ini_options]
 minversion = "7.0"
