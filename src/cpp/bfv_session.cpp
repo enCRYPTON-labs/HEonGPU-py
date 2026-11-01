@@ -836,9 +836,14 @@ namespace heongpu_py
                 "data"_a,
                 "Reads a ciphertext that SessionCiphertext.to_bytes or "
                 "Ciphertext.to_bytes wrote; see load_ciphertext().")
-            .def("context", &Session::context,
-                 nb::call_guard<nb::gil_scoped_release>(),
-                 "The Context of the session.")
+            .def_prop_ro(
+                "context",
+                [](const Session& self)
+                {
+                    nb::gil_scoped_release release;
+                    return self.context();
+                },
+                "The Context of the session.")
             .def("secret_key", &Session::secret_key,
                  nb::rv_policy::reference_internal,
                  nb::call_guard<nb::gil_scoped_release>(),

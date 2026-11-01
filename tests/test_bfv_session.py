@@ -509,9 +509,9 @@ def test_logic_gates_reject(session):
 
 
 def test_accessors(session):
-    assert isinstance(session.context(), bfv.Context)
-    assert session.context().poly_modulus_degree == RING_SIZE
-    assert session.context().plain_modulus == PLAIN_MODULUS
+    assert isinstance(session.context, bfv.Context)
+    assert session.context.poly_modulus_degree == RING_SIZE
+    assert session.context.plain_modulus == PLAIN_MODULUS
     assert isinstance(session.secret_key(), bfv.SecretKey)
     assert isinstance(session.public_key(), bfv.PublicKey)
     assert isinstance(session.relin_key(), bfv.RelinKey)

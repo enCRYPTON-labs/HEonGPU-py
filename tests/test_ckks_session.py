@@ -626,7 +626,7 @@ def test_ciphertext_outlives_session(xs):
     session = ckks.Session(multiplicative_depth=2)
     xs = xs[: session.slot_count]
     cipher = session.encrypt(xs)
-    context = session.context()
+    context = session.context
     secret_key = session.secret_key()
     encoder = session.encoder()
     del session
@@ -638,7 +638,7 @@ def test_ciphertext_outlives_session(xs):
 
 
 def test_accessors(session):
-    context = session.context()
+    context = session.context
     assert isinstance(context, ckks.Context)
     assert context.slot_count == session.slot_count
     assert context.rescale_mode == hg.RescaleMode.AUTOMATIC

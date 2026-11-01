@@ -1021,8 +1021,14 @@ namespace heongpu_py
                          "The scale of the parameters, which encrypt() "
                          "uses.")
             .def_prop_ro("rescale_mode", &Session::get_rescale_mode)
-            .def("context", &Session::context,
-                 "Returns the Context of the session.")
+            .def_prop_ro(
+                "context",
+                [](const Session& self)
+                {
+                    nb::gil_scoped_release release;
+                    return self.context();
+                },
+                "The Context of the session.")
             .def("secret_key", &Session::secret_key,
                  nb::rv_policy::reference_internal,
                  "Returns the SecretKey of the session (a reference). Raises "
