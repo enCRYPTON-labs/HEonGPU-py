@@ -706,6 +706,29 @@ def test_stream_handle_and_switch(setup, rng):
     np.testing.assert_array_equal(setup.decrypt(cipher), values)
 
 
+def test_key_streams(setup, rng):
+    values = setup.random(rng)
+    secret_key = setup.secret_key.copy()
+    public_key = setup.public_key.copy()
+    with hg.Stream() as stream:
+        for key in (secret_key, public_key):
+            key.switch_stream(stream)
+            assert key.stream == stream.handle
+        encryptor = bfv.Encryptor(setup.context, public_key)
+        decryptor = bfv.Decryptor(setup.context, secret_key)
+        cipher = encryptor.encrypt(
+            setup.encoder.encode(values, options=stream), options=stream
+        )
+        result = setup.encoder.decode(
+            decryptor.decrypt(cipher, options=stream), options=stream
+        )
+        stream.synchronize()
+        for key in (secret_key, public_key):
+            key.switch_stream(None)
+            assert key.stream == 0
+    np.testing.assert_array_equal(result, values)
+
+
 def test_threads(setup, rng):
     inputs = [setup.random(rng) for _ in range(4)]
     ciphers = [setup.encrypt(values) for values in inputs]

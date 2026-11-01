@@ -571,6 +571,7 @@ namespace heongpu_py
             .def("set_context", &SecretKey::set_context, "context"_a,
                  "Attaches a context to a loaded key.");
         def_storage<SecretKey>(secret_key);
+        def_stream<SecretKey>(secret_key);
         def_serialization<SecretKey>(secret_key);
         def_copy<SecretKey>(secret_key);
 
@@ -582,6 +583,7 @@ namespace heongpu_py
         public_key.def("set_context", &PublicKey::set_context, "context"_a,
                        "Attaches a context to a loaded key.");
         def_storage<PublicKey>(public_key);
+        def_stream<PublicKey>(public_key);
         def_serialization<PublicKey>(public_key);
         def_copy<PublicKey>(public_key);
 

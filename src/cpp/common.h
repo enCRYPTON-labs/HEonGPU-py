@@ -266,6 +266,25 @@ namespace heongpu_py
     }
 
     /**
+     * @brief Adds the stream property and switch_stream(stream) for a class
+     * whose data is on a CUDA stream.
+     */
+    template <typename T, typename Class> void def_stream(Class& cls)
+    {
+        cls.def_prop_ro(
+               "stream", [](const T& self)
+               { return from_stream(self.stream()); },
+               "Handle of the CUDA stream of the data.")
+            .def(
+                "switch_stream",
+                [](T& self, nb::handle stream)
+                { self.switch_stream(to_stream(stream)); },
+                nb::arg("stream").none(),
+                "Uses another stream (None: the default stream) for the "
+                "data.");
+    }
+
+    /**
      * @brief Adds __copy__ and __deepcopy__ for a class whose C++ copy
      * constructor copies the data.
      */

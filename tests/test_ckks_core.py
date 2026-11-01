@@ -140,6 +140,7 @@ def test_key_serialization(ckks_setup, name, tmp_path):
     key = getattr(ckks_setup, name)
     data = key.to_bytes()
     assert isinstance(data, bytes) and len(data) > 0
+
     # The Galois keys are kept in a hash map, so their order in the data can
     # change after loading.
     def same(other):
@@ -285,6 +286,30 @@ def test_stream_execution(ckks_setup, rng):
             options=stream,
         )
         stream.synchronize()
+    np.testing.assert_allclose(result[:8], values, atol=TOLERANCE)
+
+
+def test_key_streams(ckks_setup, rng):
+    values = rng.uniform(-1, 1, 8)
+    secret_key = ckks_setup.secret_key.copy()
+    public_key = ckks_setup.public_key.copy()
+    with hg.Stream() as stream:
+        for key in (secret_key, public_key):
+            key.switch_stream(stream)
+            assert key.stream == stream.handle
+        encryptor = ckks.Encryptor(ckks_setup.context, public_key)
+        decryptor = ckks.Decryptor(ckks_setup.context, secret_key)
+        cipher = encryptor.encrypt(
+            ckks_setup.encoder.encode(values, ckks_setup.scale, options=stream),
+            options=stream,
+        )
+        result = ckks_setup.encoder.decode(
+            decryptor.decrypt(cipher, options=stream), options=stream
+        )
+        stream.synchronize()
+        for key in (secret_key, public_key):
+            key.switch_stream(None)
+            assert key.stream == 0
     np.testing.assert_allclose(result[:8], values, atol=TOLERANCE)
 
 
