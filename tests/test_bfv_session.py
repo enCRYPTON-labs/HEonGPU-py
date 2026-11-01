@@ -117,6 +117,26 @@ def test_session_generated_plain_modulus():
     assert t % (2 * s.slot_count) == 1
 
 
+def test_session_from_keywords(rng):
+    s = bfv.Session(
+        multiplicative_depth=1,
+        plain_modulus=PLAIN_MODULUS,
+        poly_modulus_degree=4096,
+        rotations=[1],
+    )
+    assert s.slot_count == 4096
+    assert s.plain_modulus == PLAIN_MODULUS
+    x = rng.integers(0, PLAIN_MODULUS, 4096, dtype=np.uint64)
+    np.testing.assert_array_equal(
+        s.decrypt(s.encrypt(x) * s.encrypt(x)), x * x % PLAIN_MODULUS
+    )
+    assert (
+        bfv.Session(plain_modulus_bit_size=21).plain_modulus.bit_length() == 21
+    )
+    with pytest.raises(TypeError):
+        bfv.Session(1)
+
+
 def test_session_too_deep():
     params = make_params(depth=200, poly_modulus_degree=4096)
     with pytest.raises(hg.ParameterError):

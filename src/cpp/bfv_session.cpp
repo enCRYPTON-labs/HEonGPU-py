@@ -649,6 +649,31 @@ namespace heongpu_py
                 "parameters"_a, "rotations"_a.none() = nb::none(),
                 "Generates the context of the parameter set and the keys as "
                 "Session(params, rotations) does.")
+            .def(
+                "__init__",
+                [](Session* self, int multiplicative_depth,
+                   Data64 plain_modulus, int plain_modulus_bit_size,
+                   std::size_t poly_modulus_degree,
+                   heongpu::sec_level_type security_level,
+                   nb::handle rotations)
+                {
+                    Params params;
+                    params.multiplicative_depth = multiplicative_depth;
+                    params.plain_modulus = plain_modulus;
+                    params.plain_modulus_bit_size = plain_modulus_bit_size;
+                    params.poly_modulus_degree = poly_modulus_degree;
+                    params.security_level = security_level;
+                    std::vector<int> steps = to_rotations(rotations);
+                    nb::gil_scoped_release release;
+                    new (self) Session(params, steps);
+                },
+                nb::kw_only(), "multiplicative_depth"_a = 1,
+                "plain_modulus"_a = 0, "plain_modulus_bit_size"_a = 20,
+                "poly_modulus_degree"_a = 0,
+                "security_level"_a = heongpu::sec_level_type::sec128,
+                "rotations"_a.none() = nb::none(),
+                "The same as Session(Params(...), rotations) with the given "
+                "requirements.")
             .def_prop_ro("role", &Session::role,
                          "The keys of the session: OWNER has the secret key, "
                          "EVALUATOR the evaluation keys, ENCRYPTOR the public "
