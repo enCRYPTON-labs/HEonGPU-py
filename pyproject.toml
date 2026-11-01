@@ -11,7 +11,7 @@ license = "Apache-2.0"
 license-files = ["LICENSE"]
 authors = [{ name = "Alişah Özcan", email = "alisahozcan97@gmail.com" }]
 maintainers = [{ name = "enCRYPTON-Labs" }]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = ["numpy>=1.22"]
 keywords = [
     "homomorphic encryption",
@@ -53,6 +53,8 @@ cmake.build-type = "Release"
 build-dir = "build/{wheel_tag}"
 wheel.packages = ["src/heongpu"]
 install.components = ["heongpu_python"]
+# One wheel of the stable ABI for Python 3.12 and newer.
+wheel.py-api = "cp312"
 sdist.exclude = ["build", ".github"]
 
 [tool.scikit-build.cmake.define]
@@ -72,4 +74,4 @@ line-length = 80
 
 [tool.ruff]
 line-length = 80
-target-version = "py39"
+target-version = "py310"

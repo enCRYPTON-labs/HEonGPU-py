@@ -33,7 +33,10 @@ set(HEONGPU_PY_COMPONENT heongpu_python)
 include(cmake/HEonGPUDependency.cmake)
 
 # Python and nanobind.
-find_package(Python 3.9 REQUIRED COMPONENTS Interpreter Development.Module)
+# SKBUILD_SABI_COMPONENT is Development.SABIModule when scikit-build-core
+# builds a wheel of the stable ABI.
+find_package(Python 3.10 REQUIRED COMPONENTS Interpreter Development.Module
+    ${SKBUILD_SABI_COMPONENT})
 execute_process(
     COMMAND "${Python_EXECUTABLE}" -m nanobind --cmake_dir
     OUTPUT_STRIP_TRAILING_WHITESPACE
@@ -44,7 +47,9 @@ find_package(nanobind CONFIG REQUIRED)
 file(GLOB HEONGPU_PY_SOURCES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/src/cpp/*.cpp")
 
-nanobind_add_module(_heongpu NB_STATIC ${HEONGPU_PY_SOURCES})
+# STABLE_ABI builds a module of the stable ABI (abi3) for Python 3.12 and newer,
+# and has no effect on older versions.
+nanobind_add_module(_heongpu NB_STATIC STABLE_ABI ${HEONGPU_PY_SOURCES})
 target_include_directories(_heongpu PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/cpp")
 target_link_libraries(_heongpu PRIVATE ${HEONGPU_PY_HEONGPU_TARGET} CUDA::cudart)
 target_compile_definitions(_heongpu PRIVATE

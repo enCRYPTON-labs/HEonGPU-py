@@ -56,7 +56,7 @@ print(session.decrypt(z)[:4])
 
 - Linux with an NVIDIA GPU and driver
 - CUDA Toolkit 12.8 or newer
-- Python 3.9 or newer, NumPy
+- Python 3.10 or newer, NumPy
 - CMake 4.0 or newer (installed by pip if missing), GCC with C++20 support
 - The libraries HEonGPU needs: GMP, NTL, OpenSSL and zlib (for example
   `apt install libgmp-dev libntl-dev libssl-dev zlib1g-dev`)
