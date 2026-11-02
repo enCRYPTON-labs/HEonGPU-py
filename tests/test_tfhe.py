@@ -18,15 +18,6 @@ from heongpu import tfhe
 
 SIZE = 64
 
-# In HEonGPU 2.1.0 the phase of a bootstrapped gate output is shifted by
-# about -1/16 of the torus (+1/8 becomes about +0.065 and -1/8 about -0.185).
-# A gate with one gate output and one fresh ciphertext as inputs is still
-# correct, but a gate on two gate outputs gives wrong bits.
-COMPOSITION_BUG = (
-    "HEonGPU 2.1.0: bootstrapped gate outputs carry a phase offset of about "
-    "-1/16, so gates on two gate outputs give wrong bits"
-)
-
 BINARY_GATES = {
     "NAND": lambda x, y: ~(x & y),
     "AND": lambda x, y: x & y,
@@ -387,7 +378,6 @@ def test_gate_on_gate_output_and_fresh_input(setup, rng):
         assert_array_equal(setup.decrypt(result), function(x, y), gate)
 
 
-@pytest.mark.xfail(reason=COMPOSITION_BUG, strict=True)
 @pytest.mark.parametrize("gate", sorted(BINARY_GATES))
 def test_gate_on_gate_outputs(setup, rng, gate):
     x, y = random_bits(rng, 1000), random_bits(rng, 1000)
@@ -398,7 +388,6 @@ def test_gate_on_gate_outputs(setup, rng, gate):
     assert_array_equal(setup.decrypt(result), BINARY_GATES[gate](x, y))
 
 
-@pytest.mark.xfail(reason=COMPOSITION_BUG, strict=False)
 def test_ripple_carry_adder(setup, rng):
     """Adds two vectors of 8-bit numbers with a circuit of gates."""
     bits, lanes = 8, 32
@@ -769,7 +758,6 @@ def test_long_gate_chain(setup, rng):
 
 
 @pytest.mark.slow
-@pytest.mark.xfail(reason=COMPOSITION_BUG, strict=False)
 def test_adder_32_bit(setup, rng):
     bits, lanes = 32, 256
     x = rng.integers(0, 2**31, lanes, dtype=np.int64)

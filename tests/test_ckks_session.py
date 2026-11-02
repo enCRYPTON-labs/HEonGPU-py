@@ -661,12 +661,6 @@ def test_accessors(session):
 # ----------------------------------------------------------------------
 
 
-# The streams below are blocking streams: HEonGPU 2.1.0 copies an operand
-# that the automatic rescale mode brings to another level on the stream of
-# that operand, so on a non-blocking stream an operand of the default stream
-# is not ordered with the operation (see the xfail test below).
-
-
 def test_on_stream(session, xs, ys, x):
     with hg.Stream(non_blocking=False) as stream:
         view = session.on_stream(stream)
@@ -717,11 +711,6 @@ def test_threads_with_stream_views(session, xs, x):
         stream.close()
 
 
-@pytest.mark.xfail(
-    strict=False,
-    reason="HEonGPU 2.1.0 aligns the level of an operand of the default "
-    "stream on that stream, unordered with a non-blocking stream",
-)
 def test_non_blocking_stream_with_default_stream_operand(session, xs, ys, x):
     with hg.Stream(non_blocking=True) as stream:
         view = session.on_stream(stream)

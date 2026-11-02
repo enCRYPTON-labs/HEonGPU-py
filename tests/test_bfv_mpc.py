@@ -23,16 +23,6 @@ PLAIN_MODULUS = 1032193
 # t = 1 (mod 2N) for N = 16384.
 PLAIN_MODULUS_LARGE = 786433
 
-# HEonGPU 2.1.0 samples only 2 of the 2 * d error polynomials of the round 2
-# relinearization key share (HEMultiPartyManager::generate_relin_key_share);
-# the others are read from uninitialized device memory. The collective
-# relinearization key is only correct when that memory happens to be zero.
-relin_key_issue = pytest.mark.xfail(
-    reason="HEonGPU 2.1.0: the round 2 relinearization key share reads "
-    "uninitialized error polynomials",
-    raises=AssertionError,
-    strict=False,
-)
 
 
 def make_context(poly_modulus_degree=POLY_MODULUS_DEGREE):
@@ -188,7 +178,7 @@ def mpc():
 
 
 # A serialized relinearization key has two header fields that the key
-# switching method of these parameters does not use and HEonGPU 2.1.0 leaves
+# switching method of these parameters does not use and HEonGPU leaves
 # uninitialized, so relinearization keys are compared after the header.
 HEADER_BYTES = 64
 
@@ -354,7 +344,6 @@ def test_three_party_flow(mpc, rng):
     )
 
 
-@relin_key_issue
 def test_three_party_multiply_relinearize_rotate(mpc, rng):
     """The flow of example/mpc/1_multiparty_computation_bfv.cpp."""
     a, b, c = (mpc.random(rng) for _ in range(3))
@@ -371,7 +360,7 @@ def test_three_party_multiply_relinearize_rotate(mpc, rng):
 
 def test_relin_key_protocol_output(mpc, rng):
     """The protocol runs and relinearization gives a ciphertext of size 2
-    (its values are checked in the xfail test above)."""
+    (its values are checked in the test above)."""
     product = mpc.operator.multiply(
         mpc.encrypt(mpc.random(rng)), mpc.encrypt(mpc.random(rng))
     )

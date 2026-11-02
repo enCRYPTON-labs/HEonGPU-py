@@ -114,10 +114,11 @@ def sessions_on_streams():
     x = session.encrypt(xs)
     reference = session.decrypt((x * x).rotate(1) + x)
 
-    # A view of the session shares its keys and runs on its own stream.
-    # These streams are blocking streams, since the views also use x, a
-    # ciphertext of the default stream.
-    streams = [hg.Stream(non_blocking=False) for _ in range(4)]
+    # A view of the session shares its keys and runs on its own stream. The
+    # views also use x, a ciphertext of the default stream, which these
+    # non-blocking streams do not wait for.
+    hg.synchronize()
+    streams = [hg.Stream() for _ in range(4)]
 
     def work(index):
         view = session.on_stream(streams[index])

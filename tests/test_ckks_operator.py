@@ -662,12 +662,6 @@ def test_polynomial_on_blocking_stream(setup, rng):
     np.testing.assert_allclose(result, 0.5 + x + x * x, atol=1e-6)
 
 
-@pytest.mark.xfail(
-    reason="HEonGPU evaluate_poly copies its input on the stream of the "
-    "input and switches to the stream of the options without waiting for "
-    "the copy; a non-blocking stream races with it.",
-    strict=False,
-)
 def test_polynomial_on_non_blocking_stream(setup, rng):
     x = values(setup, rng)
     stream = hg.Stream(non_blocking=True)
@@ -784,29 +778,7 @@ def bits(setup, rng):
     return rng.integers(0, 2, setup.slot_count)
 
 
-# The gates that add the inputs and subtract their rescaled product mix two
-# levels in HEonGPU and raise LevelMismatchError (only XNOR with a plaintext
-# drops the sum to the level of the product).
-BROKEN_CIPHER_GATES = {"OR", "XOR", "NOR", "XNOR"}
-BROKEN_PLAIN_GATES = {"OR", "XOR", "NOR"}
-
-
-def gate_params(broken):
-    for gate in sorted(GATES):
-        marks = []
-        if gate in broken:
-            marks.append(
-                pytest.mark.xfail(
-                    reason="HEonGPU subtracts the rescaled product (one level "
-                    "lower) from the sum of the inputs",
-                    raises=hg.LevelMismatchError,
-                    strict=True,
-                )
-            )
-        yield pytest.param(gate, marks=marks)
-
-
-@pytest.mark.parametrize("gate", list(gate_params(BROKEN_CIPHER_GATES)))
+@pytest.mark.parametrize("gate", sorted(GATES))
 def test_logic_gates_ciphertexts(setup, logic, rng, gate):
     a, b = bits(setup, rng), bits(setup, rng)
     x, y = setup.encrypt(a.astype(float)), setup.encrypt(b.astype(float))
@@ -818,7 +790,7 @@ def test_logic_gates_ciphertexts(setup, logic, rng, gate):
     np.testing.assert_allclose(setup.decrypt(target), expected, atol=1e-5)
 
 
-@pytest.mark.parametrize("gate", list(gate_params(BROKEN_PLAIN_GATES)))
+@pytest.mark.parametrize("gate", sorted(GATES))
 def test_logic_gates_plaintexts(setup, logic, rng, gate):
     a, b = bits(setup, rng), bits(setup, rng)
     x = setup.encrypt(a.astype(float))

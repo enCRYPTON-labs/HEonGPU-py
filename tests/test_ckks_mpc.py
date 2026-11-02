@@ -22,19 +22,8 @@ needs_operator = pytest.mark.skipif(
     reason="ckks.ArithmeticOperator is not available",
 )
 
-# HEonGPU 2.1.0 samples only two of the 2 * d error polynomials of the round 2
-# relinearization key share (HEMultiPartyManager::generate_relin_key_share);
-# the others are uninitialized device memory. The collective key is only
-# correct when that memory happens to be zero, as in a fresh memory pool.
-relin_key_issue = pytest.mark.xfail(
-    reason="HEonGPU 2.1.0: round 2 relinearization key share uses "
-    "uninitialized error polynomials",
-    raises=AssertionError,
-    strict=False,
-)
-
 # A serialized relinearization key contains two header fields that the
-# default key switching method does not use and HEonGPU 2.1.0 leaves
+# default key switching method does not use and HEonGPU leaves
 # uninitialized; keys are compared by the data after the header.
 HEADER_BYTES = 64
 
@@ -364,7 +353,6 @@ def test_decrypt_with_stream(mpc, rng):
 
 
 @needs_operator
-@relin_key_issue
 def test_multiply_relinearize(mpc, rng):
     a = random_vector(rng, mpc.slot_count)
     b = random_vector(rng, mpc.slot_count)
@@ -392,7 +380,6 @@ def test_rotate(mpc, rng):
 
 
 @needs_operator
-@relin_key_issue
 def test_multiply_rotate_three_inputs(mpc, rng):
     inputs = [random_vector(rng, mpc.slot_count) for _ in range(PARTIES)]
     # Every participant encrypts its own input with the collective key.
@@ -447,7 +434,6 @@ def test_collective_bootstrapping(mpc, rng):
 
 
 @needs_operator
-@relin_key_issue
 def test_multiply_after_collective_bootstrapping(mpc, rng):
     values = random_vector(rng, mpc.slot_count, -1.0, 1.0)
     operator = ckks.ArithmeticOperator(mpc.context, mpc.encoder)
