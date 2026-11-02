@@ -115,10 +115,8 @@ def sessions_on_streams():
     reference = session.decrypt((x * x).rotate(1) + x)
 
     # A view of the session shares its keys and runs on its own stream.
-    # These streams are blocking streams (see the Known limitations section
-    # of the README: in HEonGPU 2.1.0, an operand of the default stream that
-    # the automatic rescale mode moves to another level is copied on the
-    # default stream).
+    # These streams are blocking streams, since the views also use x, a
+    # ciphertext of the default stream.
     streams = [hg.Stream(non_blocking=False) for _ in range(4)]
 
     def work(index):

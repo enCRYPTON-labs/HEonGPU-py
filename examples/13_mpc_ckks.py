@@ -19,10 +19,8 @@ key, the sum of them. The parties:
 All parties run in this process; in practice every share is serialized
 (to_bytes()) and sent to the server.
 
-The collective relinearization key (two rounds, generate_relin_key_init and
-generate_relin_key_share) is not used here: in HEonGPU 2.1.0 it is not
-always correct (see the Known limitations section of the README). The
-computation below needs no relinearization: it multiplies by plaintexts.
+The computation below needs no relinearization: it multiplies by
+plaintexts, so the collective relinearization key is not generated.
 """
 
 import numpy as np

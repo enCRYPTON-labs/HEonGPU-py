@@ -35,8 +35,3 @@ The bootstrapping examples use presets with fewer levels between two
 bootstrappings than the default presets (3 for slim and regular, 2 for bit,
 1 for gate), since their keys need less memory; the default presets need
 more than 13 GiB.
-
-Some examples avoid paths that do not give correct results with HEonGPU
-2.1.0 (the collective relinearization key, some `ckks.LogicOperator` gates,
-TFHE gates on two gate outputs); see
-[Known limitations](../README.md#known-limitations).

@@ -278,40 +278,6 @@ pytest -m ""        # all tests
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for a development build.
 
-## Known limitations
-
-These behaviors of HEonGPU 2.1.0 affect Python programs; the examples avoid
-them.
-
-- **Collective relinearization key**: in multiparty computation (CKKS and
-  BFV), the round 2 share of the relinearization key
-  (`generate_relin_key_share`) uses uninitialized error polynomials, so the
-  collective relinearization key is not always correct and products
-  relinearized with it can decrypt to wrong values. Collective public and
-  Galois keys, distributed decryption and collective bootstrapping are not
-  affected.
-- **`ckks.LogicOperator` gates**: OR, XOR, NOR and XNOR of two ciphertexts,
-  and OR, XOR and NOR of a ciphertext and a plaintext, raise
-  `LevelMismatchError`, since they subtract the rescaled product (one level
-  lower) from the sum of the inputs. AND, NAND and NOT work; so do the gates
-  of the session API (`ckks.OR(a, b)`, ...) and gate bootstrapping.
-- **TFHE gate composition**: a bootstrapped gate output carries a phase
-  offset of about -1/16 of the torus, so a gate whose two inputs are both
-  gate outputs can give wrong bits. A gate with one gate output and one
-  fresh ciphertext as inputs gives correct bits.
-- **Non-blocking streams**: in the automatic rescale mode, an operand of the
-  default stream that is brought to another level is copied on the default
-  stream, which a non-blocking stream does not wait for; and
-  `ArithmeticOperator.evaluate_polynomial` copies its input on the input's
-  stream without the stream of `options=` waiting for the copy. Use
-  blocking streams (`heongpu.Stream(non_blocking=False)`) for session views
-  that use ciphertexts of the default stream and for polynomial evaluation
-  on a stream.
-- **Out of memory while creating a bootstrapping session**: a full memory
-  pool usually raises `MemoryError`, but while a session is created from a
-  `BootstrappingPreset` it terminates the process. Give the pool enough room
-  (see Bootstrapping above) before creating such a session.
-
 ## License
 
 HEonGPU-py is licensed under the [Apache License 2.0](LICENSE).

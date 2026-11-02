@@ -139,9 +139,7 @@ def main():
     # ------------------------------------------------------------------
     # 7. Logic operations on bits
     # ------------------------------------------------------------------
-    # LogicOperator works in the manual rescale mode. In HEonGPU 2.1.0 its
-    # AND, NAND and NOT give correct results; see the Known limitations
-    # section of the README for the other gates.
+    # LogicOperator works in the manual rescale mode.
     logic = ckks.LogicOperator(context, encoder, scale)
     a = (np.arange(n) % 2).astype(float)
     b = ((np.arange(n) // 2) % 2).astype(float)

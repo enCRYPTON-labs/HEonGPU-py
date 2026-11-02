@@ -9,10 +9,6 @@ A TFHE ciphertext holds a vector of encrypted bits; every gate is applied to
 all bits at once and bootstraps its output, so the noise does not grow with
 the number of gates. Encryption uses the secret key; the gates use the
 bootstrapping key, which can be given to a server.
-
-In HEonGPU 2.1.0 a gate whose two inputs are both gate outputs can give
-wrong bits (see the Known limitations section of the README). The circuits
-below therefore combine every gate output with a fresh ciphertext.
 """
 
 import numpy as np

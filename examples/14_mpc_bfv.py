@@ -11,9 +11,8 @@ score, and the parties decrypt the result together. A long chain of
 plaintext products shows the collective bootstrapping, which restores the
 noise budget without the secret keys leaving the parties.
 
-The collective relinearization key is not used here: in HEonGPU 2.1.0 it is
-not always correct (see the Known limitations section of the README). The
-computation below needs no relinearization.
+The computation below needs no relinearization, so the collective
+relinearization key is not generated.
 """
 
 import numpy as np
