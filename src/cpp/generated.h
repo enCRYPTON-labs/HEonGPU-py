@@ -10,12 +10,10 @@
 
 namespace heongpu_py
 {
-    // HEonGPU runs its kernels on keys and plaintexts without checking that
-    // they hold data, and an empty one makes an illegal memory access that
-    // breaks the CUDA context. Their "generated" flags are private; pointers
-    // to them are formed in explicit instantiations, where access checking
-    // does not apply. The tags are in an unnamed namespace, so every
-    // translation unit has its own instantiations.
+    // Accessors of the "generated" flags of keys and plaintexts, used to check
+    // that an object holds data before an operation uses it. The tags are in
+    // an unnamed namespace, so every translation unit has its own
+    // instantiations.
     namespace
     {
         template <typename Tag, typename Tag::type Member>
@@ -128,8 +126,7 @@ namespace heongpu_py
         }
 
         /**
-         * @brief Marks a plaintext as generated, for HEonGPU functions that
-         * fill a plaintext without doing it.
+         * @brief Marks a plaintext as generated.
          */
         inline void
         mark_generated(heongpu::Plaintext<heongpu::Scheme::BFV>& plain)

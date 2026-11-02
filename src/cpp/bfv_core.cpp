@@ -28,10 +28,8 @@ namespace heongpu_py
         using Decryptor = heongpu::HEDecryptor<BFV>;
         using KeyGenerator = heongpu::HEKeyGenerator<BFV>;
 
-        // HEEncoder<Scheme::BFV> has no public accessor for its context, and
-        // the encoder needs the plaintext modulus to reduce the input values.
-        // The pointer to the private member is formed in an explicit
-        // instantiation, where access checking does not apply.
+        // Accessor of the context of an encoder, which gives the plaintext
+        // modulus the input values are reduced with.
         struct EncoderContextTag
         {
             using type = ContextPtr Encoder::*;
@@ -192,9 +190,8 @@ namespace heongpu_py
         }
 
         /**
-         * @brief The decryptor reads the first two polynomials of a
-         * ciphertext only, so a product must be relinearized before it is
-         * decrypted.
+         * @brief Checks that a ciphertext is relinearized; a product must be
+         * relinearized before it is decrypted.
          */
         void require_relinearized(const Ciphertext& cipher)
         {

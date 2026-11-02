@@ -24,9 +24,8 @@ namespace heongpu_py
         using LogicOperator = heongpu::HELogicOperator<BFV>;
 
         /**
-         * @brief Reads the protected context of an operator, which the
-         * outputs of the operations without a value-returning C++ overload
-         * are created with.
+         * @brief Returns the context of an operator, which the outputs of the
+         * operations are created with.
          */
         struct OperatorAccess : Operator
         {

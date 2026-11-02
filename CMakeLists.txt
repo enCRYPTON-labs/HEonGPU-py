@@ -51,8 +51,8 @@ file(GLOB HEONGPU_PY_SOURCES CONFIGURE_DEPENDS
 # and has no effect on older versions.
 nanobind_add_module(_heongpu NB_STATIC STABLE_ABI ${HEONGPU_PY_SOURCES})
 target_include_directories(_heongpu PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/cpp")
-# HEonGPU links libraries the module does not use, such as cuRAND (more than
-# 100 MB), which would otherwise be copied into the wheels.
+# --as-needed drops the libraries the module does not use, such as cuRAND
+# (more than 100 MB), so that they are not copied into the wheels.
 target_link_options(_heongpu PRIVATE "LINKER:--as-needed")
 target_link_libraries(_heongpu PRIVATE ${HEONGPU_PY_HEONGPU_TARGET} CUDA::cudart)
 target_compile_definitions(_heongpu PRIVATE

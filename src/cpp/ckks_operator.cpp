@@ -34,10 +34,8 @@ namespace heongpu_py
         using Options = heongpu::ExecutionOptions;
 
         /**
-         * @brief Reads the context of an operator, which HEOperator keeps as
-         * a protected member. The outputs of the operations without a C++
-         * overload that returns them are created with it, as the C++
-         * overloads do.
+         * @brief Returns the context of an operator, which the outputs of the
+         * operations are created with, as the C++ overloads do.
          */
         struct OperatorAccess : BaseOperator
         {
@@ -47,8 +45,7 @@ namespace heongpu_py
             }
         };
 
-        // HELogicOperator derives privately from HEOperator; an explicit
-        // conversion to the base class is still valid.
+        // A LogicOperator is converted to its HEOperator base explicitly.
         const ContextPtr& context_of(const ArithmeticOperator& op)
         {
             return OperatorAccess::context(op);

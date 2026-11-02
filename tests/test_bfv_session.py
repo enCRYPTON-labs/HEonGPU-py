@@ -798,8 +798,8 @@ def test_load_lower_level_ciphertext(session, rng):
     np.testing.assert_array_equal(
         session.decrypt(session.load_ciphertext(buffer)), x
     )
-    # HEonGPU reports some malformed ciphertexts with a plain RuntimeError,
-    # the base class of SerializationError.
+    # Malformed ciphertexts raise RuntimeError or its subclass
+    # SerializationError.
     with pytest.raises(RuntimeError):
         session.ciphertext_from_bytes(b"garbage")
 

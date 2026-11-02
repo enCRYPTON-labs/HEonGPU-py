@@ -47,8 +47,7 @@ namespace heongpu_py
         // --------------------------------------------------------------
         // Serialization format
         //
-        // HEonGPU has no save()/load() for the TFHE classes yet, so the
-        // Python package writes them in its own format:
+        // The TFHE classes are written in the format of the Python package:
         //   "HGPYTFHE" | uint32 version | uint32 kind | fields
         // Scalars are stored in the byte order of the machine, arrays as a
         // uint64 element count followed by the elements.
@@ -224,11 +223,10 @@ namespace heongpu_py
         // --------------------------------------------------------------
         // Access to the state of the TFHE classes
         //
-        // Serialization and the state checks of the bindings need members
-        // that the TFHE classes keep private. The classes declare every
-        // specialization of heongpu::input_storage_manager a friend; the
-        // specializations below, for the State type of this file, are the
-        // only code that uses this access.
+        // Accessors of the members that serialization and the state checks
+        // of the bindings use: the specializations of
+        // heongpu::input_storage_manager below, for the State type of this
+        // file.
         // --------------------------------------------------------------
 
         enum class Operation
@@ -279,7 +277,7 @@ namespace heongpu
                 *state.result = object.ciphertext_generated_;
                 return;
             case Operation::reset:
-                // The context constructor leaves the size uninitialized.
+                // Sets the ciphertext to the empty state.
                 object.shape_ = 0;
                 object.variances_.clear();
                 object.ciphertext_generated_ = false;
@@ -510,8 +508,8 @@ namespace heongpu
                         "Bootstrappingkey context mismatch! The parameters of "
                         "the data differ from those of the context.");
                 }
-                // The LWE dimension n and the ring size N are not stored in
-                // the key; a secret key of the same context has them.
+                // The LWE dimension n and the ring size N are taken from a
+                // secret key of the same context.
                 const auto& reference = *state.reference;
                 std::size_t n = reference.lwe_size();
                 std::size_t N = reference.tlwe_size() / bk_k;
@@ -636,9 +634,8 @@ namespace heongpu_py
                        std::string data = save_state(self);
                        return nb::bytes(data.data(), data.size());
                    },
-                   "Serializes the object to bytes. HEonGPU has no C++ "
-                   "serialization for TFHE yet; the format is the one of "
-                   "the Python package.")
+                   "Serializes the object to bytes in the TFHE format of the "
+                   "Python package.")
                 .def_static(
                     "from_bytes",
                     [](nb::bytes data, std::optional<ContextPtr> context)
@@ -820,8 +817,7 @@ namespace heongpu_py
 
         Ciphertext empty_ciphertext()
         {
-            // Value initialization sets the members without initializers
-            // to zero.
+            // An empty, value-initialized ciphertext.
             return Ciphertext();
         }
 

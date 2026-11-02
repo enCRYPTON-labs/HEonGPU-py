@@ -73,9 +73,9 @@ namespace heongpu_py
         }
 
         /**
-         * @brief The partial decryption and collective bootstrapping read the
-         * first two polynomials of a ciphertext only, so a product must be
-         * relinearized first.
+         * @brief Checks that a ciphertext is relinearized; a product must be
+         * relinearized before partial decryption and collective
+         * bootstrapping.
          */
         void require_relinearized(const Ciphertext& cipher)
         {
@@ -87,9 +87,8 @@ namespace heongpu_py
         }
 
         /**
-         * @brief The partial decryption and collective bootstrapping do not
-         * check that their operands belong to the context of the manager, so
-         * the shapes are compared here.
+         * @brief Checks that a ciphertext belongs to the context of the
+         * manager.
          */
         void check_ciphertext(const ContextPtr& context,
                               const Ciphertext& cipher, const char* name)
@@ -119,17 +118,15 @@ namespace heongpu_py
             }
         }
 
-        // Some members the bindings need are private. Pointers to them are
-        // formed in explicit instantiations, where access checking does not
-        // apply.
+        // Accessors of members the bindings use.
         template <typename Tag, typename Tag::type Member> struct MemberAccess
         {
             friend typename Tag::type member_pointer(Tag) { return Member; }
         };
 
-        // HEMultiPartyManager<Scheme::BFV>::decrypt_partial() does not mark
-        // its output as generated, so a partial decryption could not be
-        // serialized and sent to the party that fuses them.
+        // The "generated" flag of a ciphertext. A partial decryption is marked
+        // as generated, so that it can be serialized and sent to the party
+        // that fuses them.
         struct CiphertextGeneratedTag
         {
             using type = bool Ciphertext::*;
@@ -139,10 +136,9 @@ namespace heongpu_py
         template struct MemberAccess<CiphertextGeneratedTag,
                                      &Ciphertext::ciphertext_generated_>;
 
-        // HEMultiPartyManager<Scheme::BFV>::assemble_galois_key_share()
-        // aggregates the keys of the rotation steps of the first share only
-        // (not the keys of explicit Galois elements), and reads the other
-        // shares without checking that they have these keys.
+        // The rotations of a Galois key, used to check that Galois key shares
+        // can be combined: they must be for the same rotation steps, not for
+        // explicit Galois elements.
         struct GaloisCustomizedTag
         {
             using type = bool GaloisKey::*;
@@ -168,8 +164,7 @@ namespace heongpu_py
                 {
                     throw heongpu::ParameterError(
                         "Galois key shares generated for explicit Galois "
-                        "elements cannot be combined (HEonGPU aggregates the "
-                        "keys of rotation steps only); generate the shares "
+                        "elements cannot be combined; generate the shares "
                         "with shifts.");
                 }
                 if (share.*member_pointer(GaloisElementsTag{}) !=
@@ -641,7 +636,8 @@ namespace heongpu_py
                     require_relinearized(ciphertext);
                     heongpu::ExecutionOptions opts = to_options(options);
                     nb::gil_scoped_release release;
-                    // decrypt_partial() writes the output to the device only.
+                    // The partial decryption is computed in device memory and
+                    // then stored as the options request.
                     heongpu::ExecutionOptions device_opts = opts;
                     device_opts.storage_ = heongpu::storage_type::device;
                     Ciphertext partial(self.context, device_opts);
@@ -677,8 +673,6 @@ namespace heongpu_py
                     HEONGPU_PY_CUDA_CHECK(cudaDeviceSynchronize());
                     Plaintext plain(self.context, opts);
                     self.manager.decrypt(partials, plain, opts);
-                    // HEonGPU fills the plaintext without marking it as
-                    // generated.
                     mark_generated(plain);
                     finish(opts);
                     return plain;

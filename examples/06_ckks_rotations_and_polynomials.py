@@ -106,8 +106,7 @@ def main():
     )
 
     # The result is an ordinary ciphertext: keep computing with it while
-    # levels_left is not negative (a ciphertext that runs out of levels
-    # decrypts to wrong values).
+    # levels_left is not negative.
     t = s * 2.0 - 1.0  # tanh(z / 2)
     assert t.levels_left >= 0
     np.testing.assert_allclose(session.decrypt(t), np.tanh(zs / 2), atol=2e-3)

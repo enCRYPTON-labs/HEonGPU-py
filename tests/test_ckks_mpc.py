@@ -22,9 +22,7 @@ needs_operator = pytest.mark.skipif(
     reason="ckks.ArithmeticOperator is not available",
 )
 
-# A serialized relinearization key contains two header fields that the
-# default key switching method does not use and HEonGPU leaves
-# uninitialized; keys are compared by the data after the header.
+# Keys are compared by the data after the header.
 HEADER_BYTES = 64
 
 

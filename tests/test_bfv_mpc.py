@@ -177,9 +177,7 @@ def mpc():
     return MPCSetup()
 
 
-# A serialized relinearization key has two header fields that the key
-# switching method of these parameters does not use and HEonGPU leaves
-# uninitialized, so relinearization keys are compared after the header.
+# Keys are compared by the data after the header.
 HEADER_BYTES = 64
 
 
@@ -359,8 +357,8 @@ def test_three_party_multiply_relinearize_rotate(mpc, rng):
 
 
 def test_relin_key_protocol_output(mpc, rng):
-    """The protocol runs and relinearization gives a ciphertext of size 2
-    (its values are checked in the test above)."""
+    """Relinearization with the collective key gives a ciphertext of
+    size 2."""
     product = mpc.operator.multiply(
         mpc.encrypt(mpc.random(rng)), mpc.encrypt(mpc.random(rng))
     )
@@ -389,8 +387,8 @@ def test_column_rotation_collective_galois_key(mpc, rng):
 
 
 def test_galois_key_share_for_elements(mpc):
-    """HEonGPU combines the keys of rotation steps only, so shares for
-    explicit Galois elements are rejected instead of giving a wrong key."""
+    """Only the keys of rotation steps are combined: shares for explicit
+    Galois elements are rejected."""
     shares = [
         p.manager.generate_galois_key_share(
             p.secret_key, mpc.seed, galois_elements=[3]
@@ -502,8 +500,8 @@ def test_galois_key_share_serialization(mpc, rng):
     ]
     assert all(type(share) is bfv.MultipartyGaloisKey for share in shares)
     collective = mpc.server.assemble_galois_key_share(shares)
-    # The rotation steps are kept in a hash map, whose order in the data can
-    # change on loading; the keys are compared by their rotations.
+    # The order of the rotation steps in the data can change on loading; the
+    # keys are compared by their rotations.
     assert len(collective.to_bytes()) == len(mpc.galois_key.to_bytes())
     values = mpc.random(rng)
     rotated = mpc.operator.rotate_rows(mpc.encrypt(values), collective, -2)

@@ -141,8 +141,7 @@ def test_key_serialization(ckks_setup, name, tmp_path):
     data = key.to_bytes()
     assert isinstance(data, bytes) and len(data) > 0
 
-    # The Galois keys are kept in a hash map, so their order in the data can
-    # change after loading.
+    # The order of the Galois keys in the data can change after loading.
     def same(other):
         other_data = other.to_bytes()
         if name == "galois_key":
@@ -192,7 +191,7 @@ def test_ciphertext_serialization(ckks_setup, rng, tmp_path):
 
 
 def test_serialization_error():
-    # Some malformed inputs are reported as plain RuntimeError by HEonGPU.
+    # Malformed inputs raise SerializationError or RuntimeError.
     with pytest.raises((hg.SerializationError, RuntimeError)):
         ckks.Ciphertext.from_bytes(b"not a ciphertext")
 

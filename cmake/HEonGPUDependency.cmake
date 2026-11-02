@@ -56,7 +56,7 @@ if(NOT HEONGPU_PY_HEONGPU_TARGET)
     )
     FetchContent_MakeAvailable(heongpu)
     set(HEONGPU_PY_HEONGPU_TARGET heongpu)
-    # project() of HEonGPU sets its version only in its own directory scope.
+    # The version of HEonGPU, from its target.
     get_target_property(HEONGPU_PY_HEONGPU_VERSION heongpu VERSION)
     set(HEONGPU_PY_HEONGPU_FETCHED ON)
 endif()
@@ -65,7 +65,7 @@ find_package(CUDAToolkit REQUIRED)
 
 get_target_property(_heongpu_py_heongpu_type ${HEONGPU_PY_HEONGPU_TARGET} TYPE)
 if(_heongpu_py_heongpu_type STREQUAL "STATIC_LIBRARY")
-    # A static HEonGPU leaves the CUDA device link to the module.
+    # With a static HEonGPU, the module performs the CUDA device link.
     enable_language(CUDA)
 endif()
 
@@ -79,8 +79,9 @@ function(heongpu_py_configure_device_link target)
     elseif(DEFINED CMAKE_CUDA_ARCHITECTURES AND NOT CMAKE_CUDA_ARCHITECTURES STREQUAL "52")
         set(_architectures ${CMAKE_CUDA_ARCHITECTURES})
     else()
-        # The default of nvcc is too old for HEonGPU; use the GPU of this
-        # machine. Pass CMAKE_CUDA_ARCHITECTURES to build for other GPUs.
+        # Without CMAKE_CUDA_ARCHITECTURES (or with the nvcc default 52),
+        # build for the GPU of this machine. Pass CMAKE_CUDA_ARCHITECTURES to
+        # build for other GPUs.
         set(_architectures native)
     endif()
     message(STATUS "CUDA architectures of the device link: ${_architectures}")

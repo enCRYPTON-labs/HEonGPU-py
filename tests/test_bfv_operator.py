@@ -170,7 +170,7 @@ def test_multiply_relinearize(setup, rng):
     product = op.multiply(setup.encrypt(a), setup.encrypt(b))
     assert product.size == 3
     assert product.relinearization_required
-    # The decryptor reads only the first two polynomials.
+    # A product must be relinearized before it is decrypted.
     with pytest.raises(hg.StateError):
         setup.decryptor.decrypt(product)
     with pytest.raises(hg.StateError):

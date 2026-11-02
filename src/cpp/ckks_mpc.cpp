@@ -104,7 +104,7 @@ namespace heongpu_py
             }
             else
             {
-                // The keys do not expose their stream.
+                // Waits for the copies of the keys on the whole device.
                 HEONGPU_PY_CUDA_CHECK(cudaDeviceSynchronize());
             }
             return result;

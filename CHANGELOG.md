@@ -5,7 +5,7 @@ All notable changes to HEonGPU-py are listed here. The project follows
 
 ## 0.1.0 (unreleased)
 
-The first release of the Python bindings, for HEonGPU 2.1.
+The first release of the Python bindings, for HEonGPU 2.1.1.
 
 - The CKKS, BFV and TFHE schemes: contexts, parameter generation, keys,
   encoders, encryptors, decryptors, key generators and operators.
