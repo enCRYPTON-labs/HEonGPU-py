@@ -62,9 +62,10 @@ The wheels on PyPI are for Linux x86_64 (glibc 2.28 or newer) and Python
 3.10 or newer. They are built with CUDA 13.0 and contain the CUDA runtime
 and the other libraries the module needs, so the only requirement is an
 NVIDIA driver of version 580 or newer. They contain the code of the GPU
-architectures 7.5 (Turing), 8.0 (Ampere: it also runs on 8.6), 8.9 (Ada),
-9.0 (Hopper), 10.0 and 12.0 (Blackwell), and PTX that the driver compiles
-for newer GPUs. On other systems pip builds the package from the
+architectures 7.5 (Turing), 8.0 (Ampere), 8.9 (Ada), 9.0 (Hopper), 10.0
+and 12.0 (Blackwell), which also runs on the other GPUs of the same major
+version, such as 8.6. For other GPUs, build the package from source with
+their architecture. On other systems pip builds the package from the
 source distribution, which needs what a build from source needs.
 
 ### Building from source
