@@ -12,7 +12,7 @@ model.
 
 ## Development build
 
-Install HEonGPU 2.1 once (see its README), then build the extension module
+Install HEonGPU 2.1.1 once (see its README), then build the extension module
 with CMake and run the tests against the build:
 
 ```bash

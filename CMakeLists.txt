@@ -24,7 +24,7 @@ set(HEONGPU_PY_HEONGPU_PROVIDER "AUTO" CACHE STRING
 set_property(CACHE HEONGPU_PY_HEONGPU_PROVIDER PROPERTY STRINGS AUTO SYSTEM FETCH)
 set(HEONGPU_PY_HEONGPU_REPOSITORY "https://github.com/enCRYPTON-labs/HEonGPU.git"
     CACHE STRING "Git repository of HEonGPU, used when HEonGPU is built from source")
-set(HEONGPU_PY_HEONGPU_TAG "v2.1.0"
+set(HEONGPU_PY_HEONGPU_TAG "v2.1.1"
     CACHE STRING "Git tag of HEonGPU, used when HEonGPU is built from source")
 option(HEONGPU_PY_STUBS "Generate the type stubs (.pyi) of the extension module" ON)
 

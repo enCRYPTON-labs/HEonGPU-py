@@ -10,7 +10,7 @@
 # and the functions heongpu_py_configure_device_link() and
 # heongpu_py_install_runtime_libraries().
 
-set(_heongpu_py_required_version 2.1)
+set(_heongpu_py_required_version 2.1.1)
 
 string(TOUPPER "${HEONGPU_PY_HEONGPU_PROVIDER}" _heongpu_py_provider)
 if(NOT _heongpu_py_provider MATCHES "^(AUTO|SYSTEM|FETCH)$")

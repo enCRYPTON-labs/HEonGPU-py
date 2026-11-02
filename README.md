@@ -87,9 +87,9 @@ pip install .
 pip install --no-binary heongpu heongpu
 ```
 
-By default the build uses an installed HEonGPU 2.1 if CMake finds one, and
-otherwise downloads and builds HEonGPU v2.1.0 together with the extension
-module (this takes several minutes). The CMake option
+By default the build uses an installed HEonGPU 2.1.1 or newer if CMake finds
+one, and otherwise downloads and builds HEonGPU v2.1.1 together with the
+extension module (this takes several minutes). The CMake option
 `HEONGPU_PY_HEONGPU_PROVIDER` selects this explicitly:
 
 | Value    | HEonGPU                                                       |
