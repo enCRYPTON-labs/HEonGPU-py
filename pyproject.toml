@@ -77,7 +77,7 @@ test-command = "pytest -m nogpu -p no:cacheprovider"
 # One line: cibuildwheel separates the variables by spaces, not newlines.
 environment = """\
 HEONGPU_PY_CUDA_VERSION=13.0 \
-HEONGPU_PY_CUDA_ARCHITECTURES="75-real;80-real;90-real;100-real;120" \
+HEONGPU_PY_CUDA_ARCHITECTURES="75-real;80-real;89-real;90-real;100-real;120" \
 HEONGPU_PY_HEONGPU_TAG=v2.1.0 \
 PATH=/usr/local/cuda-13.0/bin:$PATH \
 CUDACXX=/usr/local/cuda-13.0/bin/nvcc \
