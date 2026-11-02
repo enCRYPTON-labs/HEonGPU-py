@@ -6,13 +6,14 @@
 """Multiparty computation with BFV (N-out-of-N threshold encryption).
 
 Three parties count votes: every party encrypts a vector of 0/1 votes with
-the collective public key, a server adds them and computes a weighted
-score, and the parties decrypt the result together. A long chain of
-plaintext products shows the collective bootstrapping, which restores the
-noise budget without the secret keys leaving the parties.
+the collective public key, a server adds them, finds the unanimous votes
+with products of ciphertexts and computes a weighted score, and the parties
+decrypt the results together. A long chain of plaintext products shows the
+collective bootstrapping, which restores the noise budget without the
+secret keys leaving the parties.
 
-The computation below needs no relinearization, so the collective
-relinearization key is not generated.
+A party keeps its multiparty manager between the two rounds of the
+collective relinearization key.
 """
 
 import numpy as np
@@ -43,13 +44,26 @@ def main():
     server = bfv.MultiPartyManager(context)
 
     # ------------------------------------------------------------------
-    # 1. Collective public key and Galois keys
+    # 1. Collective public, relinearization and Galois keys
     # ------------------------------------------------------------------
     public_key = server.assemble_public_key_share(
         [
             p.manager.generate_public_key_share(p.secret_key, seed)
             for p in parties
         ]
+    )
+    # The relinearization key takes two rounds: the server combines the
+    # shares of the first round, and every party computes its share of the
+    # second round from that combination.
+    relin_key_common = server.assemble_relin_key_init(
+        [p.manager.generate_relin_key_init(p.secret_key, seed) for p in parties]
+    )
+    relin_key = server.assemble_relin_key_share(
+        [
+            p.manager.generate_relin_key_share(relin_key_common, p.secret_key)
+            for p in parties
+        ],
+        relin_key_common,
     )
     galois_key = server.assemble_galois_key_share(
         [
@@ -71,7 +85,7 @@ def main():
         return encoder.decode(server.decrypt(partials))
 
     # ------------------------------------------------------------------
-    # 2. Votes: encrypted by each party, added by the server
+    # 2. Votes: encrypted by each party, added and multiplied by the server
     # ------------------------------------------------------------------
     rng = np.random.default_rng(42)
     votes = [rng.integers(0, 2, n) for _ in range(PARTIES)]
@@ -79,6 +93,12 @@ def main():
     tally = encrypted[0]
     for cipher in encrypted[1:]:
         tally = operator.add(tally, cipher)
+    # The unanimous votes: the product of the votes of all parties, each
+    # product relinearized with the collective key.
+    unanimous = encrypted[0]
+    for cipher in encrypted[1:]:
+        unanimous = operator.multiply(unanimous, cipher)
+        operator.relinearize_inplace(unanimous, relin_key)
     # A weighted score with public weights, and the neighbour's score.
     weights = rng.integers(1, 10, n)
     score = operator.multiply_plain(tally, encoder.encode(weights))
@@ -87,13 +107,15 @@ def main():
     expected_tally = sum(votes)
     expected_score = expected_tally * weights
     assert np.array_equal(decrypt(tally), expected_tally)
+    assert np.array_equal(decrypt(unanimous), votes[0] * votes[1] * votes[2])
     assert np.array_equal(decrypt(score), expected_score)
     assert np.array_equal(
         decrypt(neighbour),
         np.roll(expected_score.reshape(2, -1), -1, axis=1).reshape(-1),
     )
-    print("tally   ", decrypt(tally)[:8])
-    print("score   ", decrypt(score)[:8])
+    print("tally    ", decrypt(tally)[:8])
+    print("unanimous", decrypt(unanimous)[:8])
+    print("score    ", decrypt(score)[:8])
 
     # ------------------------------------------------------------------
     # 3. Collective bootstrapping

@@ -8,19 +8,18 @@
 Every party has its own secret key and nobody knows the collective secret
 key, the sum of them. The parties:
 
-1. build a collective public key and collective Galois keys from shares,
+1. build a collective public key, a collective relinearization key (in two
+   rounds) and collective Galois keys from shares,
 2. encrypt their inputs with the collective public key,
-3. let a server compute on the ciphertexts,
+3. let a server compute on the ciphertexts, products of ciphertexts too,
 4. decrypt the result together: every party computes a partial decryption,
    and the partial decryptions are combined,
 5. refresh a ciphertext together (collective bootstrapping) instead of
    using CKKS bootstrapping.
 
 All parties run in this process; in practice every share is serialized
-(to_bytes()) and sent to the server.
-
-The computation below needs no relinearization: it multiplies by
-plaintexts, so the collective relinearization key is not generated.
+(to_bytes()) and sent to the server. A party keeps its multiparty manager
+between the two rounds of the relinearization key.
 """
 
 import numpy as np
@@ -63,6 +62,22 @@ def main():
         p.manager.generate_public_key_share(p.secret_key, seed) for p in parties
     ]
     public_key = server.assemble_public_key_share(public_key_shares)
+
+    # The relinearization key takes two rounds: the server combines the
+    # shares of the first round, and every party computes its share of the
+    # second round from that combination.
+    relin_key_round1 = [
+        p.manager.generate_relin_key_init(p.secret_key, seed) for p in parties
+    ]
+    relin_key_common = server.assemble_relin_key_init(relin_key_round1)
+    relin_key_round2 = [
+        p.manager.generate_relin_key_share(relin_key_common, p.secret_key)
+        for p in parties
+    ]
+    relin_key = server.assemble_relin_key_share(
+        relin_key_round2, relin_key_common
+    )
+
     galois_key_shares = [
         p.manager.generate_galois_key_share(p.secret_key, seed, shifts=[1, -1])
         for p in parties
@@ -72,7 +87,7 @@ def main():
     print(
         f"public key share: {len(share_bytes) / 2**10:.0f} KiB;"
         f" collective keys: {type(public_key).__name__},"
-        f" {type(galois_key).__name__}"
+        f" {type(relin_key).__name__}, {type(galois_key).__name__}"
     )
     # A share read back from bytes needs the context and the seed.
     ckks.MultipartyPublicKey.from_bytes(share_bytes, context, seed)
@@ -86,7 +101,8 @@ def main():
     ciphertexts = [encryptor.encrypt(encoder.encode(v, scale)) for v in inputs]
 
     # ------------------------------------------------------------------
-    # 3. The server: a weighted sum and a rotation
+    # 3. The server: a weighted sum, the product of two inputs and a
+    #    rotation
     # ------------------------------------------------------------------
     operator = ckks.ArithmeticOperator(context, encoder)
     weights = [0.5, 0.3, 0.2]
@@ -97,8 +113,16 @@ def main():
         )
         operator.rescale_inplace(term)
         result = term if result is None else operator.add(result, term)
+    # A product of two ciphertexts is relinearized with the collective key.
+    product = operator.multiply(ciphertexts[0], ciphertexts[1])
+    operator.relinearize_inplace(product, relin_key)
+    operator.rescale_inplace(product)
+    result = operator.add(result, product)
     result = operator.rotate(result, galois_key, 1)
-    expected = np.roll(sum(w * v for w, v in zip(weights, inputs)), -1)
+    expected = np.roll(
+        sum(w * v for w, v in zip(weights, inputs)) + inputs[0] * inputs[1],
+        -1,
+    )
 
     # ------------------------------------------------------------------
     # 4. Collective decryption
@@ -110,8 +134,8 @@ def main():
         return encoder.decode(parties[0].manager.decrypt(partials))
 
     values = decrypt(result)
-    print("weighted sum, rotated:", values[:4])
-    print("expected:             ", expected[:4])
+    print("weighted sum + product, rotated:", values[:4])
+    print("expected:                       ", expected[:4])
     np.testing.assert_allclose(values, expected, atol=1e-4)
 
     # Two of three parties cannot decrypt.

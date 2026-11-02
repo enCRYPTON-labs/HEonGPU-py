@@ -28,8 +28,8 @@ generated and lets the pool grow to 95% of it; see
 | [10_tfhe_gates.py](10_tfhe_gates.py) | TFHE Boolean gates: truth tables, `MUX`, `out=`, gate chains, a client and a server, streams | 512 MiB |
 | [11_ckks_bootstrapping.py](11_ckks_bootstrapping.py) | CKKS slim and regular bootstrapping with a session from a `BootstrappingPreset` (N = 2^16) | 12 GiB |
 | [12_ckks_logic_bootstrapping.py](12_ckks_logic_bootstrapping.py) | CKKS bit bootstrapping (cleaning noisy bits) and gate bootstrapping (a 4-bit adder in every slot) | 12 GiB |
-| [13_mpc_ckks.py](13_mpc_ckks.py) | CKKS multiparty computation: collective public and Galois keys, distributed decryption, collective bootstrapping | 128 MiB |
-| [14_mpc_bfv.py](14_mpc_bfv.py) | BFV multiparty computation: an encrypted vote count, distributed decryption, collective bootstrapping | 128 MiB |
+| [13_mpc_ckks.py](13_mpc_ckks.py) | CKKS multiparty computation: collective public, relinearization and Galois keys, products of ciphertexts, distributed decryption, collective bootstrapping | 128 MiB |
+| [14_mpc_bfv.py](14_mpc_bfv.py) | BFV multiparty computation: collective keys, an encrypted vote count with products of ciphertexts, distributed decryption, collective bootstrapping | 128 MiB |
 
 The bootstrapping examples use presets with fewer levels between two
 bootstrappings than the default presets (3 for slim and regular, 2 for bit,
